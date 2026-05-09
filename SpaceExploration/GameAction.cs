@@ -11,6 +11,7 @@ namespace SpaceExploration
 
         public static async Task InitiateWorld()
         {
+            AnsiConsole.Profile.Width = 160;
             StarSystem.GenerateNewSystems();
             while (!gameComplete)
             {
@@ -51,10 +52,19 @@ namespace SpaceExploration
                     await JumpSystem();
                 else if (playerEntry == "2" || playerEntry?.Equals("V", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    gameMode = 2;
-                    Console.WriteLine("Flying into star system...");
-                    await Task.Delay(2000);
-                    await SystemMenu();
+                    if (Player.currentSystem is null)
+                    {
+                        Console.WriteLine("No current star system selected.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                    }
+                    else
+                    {
+                        gameMode = 2;
+                        Console.WriteLine("Flying into star system...");
+                        await Task.Delay(2000);
+                        await SystemMenu();
+                    }
                 }
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
                     CheckInventory();
@@ -188,7 +198,7 @@ namespace SpaceExploration
             
             List<int> nearbySystems = StarSystem.GetNearbySystems();
 
-            Table starSystemTable = new Table();
+            Table starSystemTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
             starSystemTable.AddColumn(new TableColumn("Option").NoWrap());
             starSystemTable.AddColumn(new TableColumn("Name").NoWrap());
             starSystemTable.AddColumn(new TableColumn("Fuel Cost").NoWrap());
@@ -278,7 +288,7 @@ namespace SpaceExploration
             }
 
             Console.WriteLine($"""
-            Loading stars and planets within {Player.currentSystem}...
+            Loading stars and planets within {StarSystem.Systems[Player.currentSystem ?? 0].Name}...
             Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
             """);
             await Task.Delay(2000);
@@ -489,6 +499,100 @@ namespace SpaceExploration
             type ??= "???";
 
             return type;
+        }
+
+        private static async Task TransactElements(Dictionary<Element.ElementType, int> elements, bool verbose)
+        {
+            int have;
+            int delta;
+            int cargo = Player.ElementAmounts.Values.Sum();
+            int cap = Player.CargoCap.FunctionAttributes[Player.CargoCap.Level];
+            string? name;
+            bool invalidResponse;
+
+            if (cargo + elements.Values.Sum() > cap)
+            {
+                Console.WriteLine($"You don't have enough cargo capacity for this transaction.");
+                await Task.Delay(2000);
+                return;
+            }
+            
+            foreach (KeyValuePair<Element.ElementType, int> element in elements)
+            {
+                have = Player.ElementAmounts[element.Key];
+                delta = element.Value;
+                name = Element.ElementCatalog[element.Key].DisplayName;
+
+                if (delta < 0)
+                {
+                    if (verbose)
+                            Console.WriteLine($"You have {have} units of {name} and need {delta} units.");
+
+                    if (have < -delta)
+                    {
+                        Console.WriteLine($"You don't have enough {name}.");
+                        await Task.Delay(2000);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (verbose)
+                            Console.WriteLine($"You have {have} units of {name} and will get {delta} units.");
+
+                    if (cargo + delta > cap)
+                    {
+                        do
+                        {
+                            invalidResponse = false;
+
+                            Console.WriteLine($"Your current cargo capacity of {cargo} won't have room for {delta - cap - cargo} units of {name}, the rest will be discarded.");
+                            Console.WriteLine("Proceed anyway? (Y/N)");
+
+                            string? playerEntry = Console.ReadLine();
+
+                            if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                if (verbose)
+                                {
+                                    Console.WriteLine("Proceeding with transaction...");
+                                    await Task.Delay(2000);
+                                }
+                            }
+                            else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                Console.WriteLine("Canceling transaction...");
+                                await Task.Delay(2000);
+                                return;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid command. Try again.");
+                                await Task.Delay(2000);
+                                invalidResponse = true;
+                            }
+                        } while (invalidResponse);
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<Element.ElementType, int> element in elements)
+            {
+                have = Player.ElementAmounts[element.Key];
+                delta = element.Value;
+                name = Element.ElementCatalog[element.Key].DisplayName;
+
+                if (verbose)
+                {
+                    Console.WriteLine($"Change of {delta} units of {name}...");
+                    await Task.Delay(1000);
+                }
+
+                Player.ElementAmounts[element.Key] += delta;
+            }
+
+            if (verbose)
+                Console.WriteLine("Transaction complete.");
         }
     }
 }

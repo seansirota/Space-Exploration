@@ -83,19 +83,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\SSirota\\.nuget\\packages\\": {}
+    "/home/sean/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\SSirota\\Documents\\Space Exploration\\SpaceExploration\\SpaceExploration.csproj",
+      "projectUniqueName": "/home/sean/Documents/Space Exploration/Space-Exploration/SpaceExploration/SpaceExploration.csproj",
       "projectName": "SpaceExploration",
-      "projectPath": "C:\\Users\\SSirota\\Documents\\Space Exploration\\SpaceExploration\\SpaceExploration.csproj",
-      "packagesPath": "C:\\Users\\SSirota\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\SSirota\\Documents\\Space Exploration\\SpaceExploration\\obj\\",
+      "projectPath": "/home/sean/Documents/Space Exploration/Space-Exploration/SpaceExploration/SpaceExploration.csproj",
+      "packagesPath": "/home/sean/.nuget/packages/",
+      "outputPath": "/home/sean/Documents/Space Exploration/Space-Exploration/SpaceExploration/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\SSirota\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/sean/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -145,7 +145,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.420/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.420/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

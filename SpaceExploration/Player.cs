@@ -9,37 +9,41 @@ namespace SpaceExploration
         public static int Y { get; set; } = 0;
         public static int? currentSystem { get; set; } = null;
         public static CelObjectGeneric? currentObject = null;
-        public static double Fuel { get; set; } = 50;
-        public static double Hull { get; set; } = 100;
-        public static double Air { get; set; } = 100;
+        public static int Cargo { get; set; } = CargoCap.FunctionAttributes[CargoCap.Level];
+        public static double Fuel { get; set; } = FuelCap.FunctionAttributes[FuelCap.Level];
+        public static double Hull { get; set; } = HullInt.FunctionAttributes[HullInt.Level];
+        public static double Air { get; set; } = AirCap.FunctionAttributes[AirCap.Level];
         public static SystemScanner SysScan { get; set; } = new SystemScanner();
         public static CelestialScanner CelScan { get; set; } = new CelestialScanner();
         public static FuelCapacity FuelCap { get; set; } = new FuelCapacity();
         public static RockMiner RockMiner { get; set; } = new RockMiner();
         public static GasSiphon GasSiphon { get; set; } = new GasSiphon();
         public static CollectClaw CollectClaw { get; set; } = new CollectClaw();
-        public static Dictionary<Element.ElementName, int> ElementAmounts = new Dictionary<Element.ElementName, int>()
+        public static CargoCapacity CargoCap { get; set; } = new CargoCapacity();
+        public static AirCapacity AirCap { get; set; } = new AirCapacity();
+        public static HullIntegrity HullInt { get; set; } = new HullIntegrity();
+        public static Dictionary<Element.ElementType, int> ElementAmounts = new Dictionary<Element.ElementType, int>()
         {
-            [Element.ElementName.Hydrogen] = 0,
-            [Element.ElementName.Helium] = 0,
-            [Element.ElementName.Carbon] = 0,
-            [Element.ElementName.Nitrogen] = 0,
-            [Element.ElementName.Oxygen] = 0,
-            [Element.ElementName.Magnesium] = 0,
-            [Element.ElementName.Aluminum] = 0,
-            [Element.ElementName.Silicon] = 0,
-            [Element.ElementName.Sulfur] = 0,
-            [Element.ElementName.Chlorine] = 0,
-            [Element.ElementName.Titanium] = 0,
-            [Element.ElementName.Iron] = 0,
-            [Element.ElementName.Nickel] = 0,
-            [Element.ElementName.Copper] = 0,
-            [Element.ElementName.Uranium] = 0,
-            [Element.ElementName.Water] = 0,
-            [Element.ElementName.Methane] = 0,
-            [Element.ElementName.Ammonia] = 0,
-            [Element.ElementName.CarbonDioxide] = 0,
-            [Element.ElementName.Antimatter] = 0,
+            [Element.ElementType.Hydrogen] = 0,
+            [Element.ElementType.Helium] = 0,
+            [Element.ElementType.Carbon] = 0,
+            [Element.ElementType.Nitrogen] = 0,
+            [Element.ElementType.Oxygen] = 0,
+            [Element.ElementType.Magnesium] = 0,
+            [Element.ElementType.Aluminum] = 0,
+            [Element.ElementType.Silicon] = 0,
+            [Element.ElementType.Sulfur] = 0,
+            [Element.ElementType.Chlorine] = 0,
+            [Element.ElementType.Titanium] = 0,
+            [Element.ElementType.Iron] = 0,
+            [Element.ElementType.Nickel] = 0,
+            [Element.ElementType.Copper] = 0,
+            [Element.ElementType.Uranium] = 0,
+            [Element.ElementType.Water] = 0,
+            [Element.ElementType.Methane] = 0,
+            [Element.ElementType.Ammonia] = 0,
+            [Element.ElementType.CarbonDioxide] = 0,
+            [Element.ElementType.Antimatter] = 0,
         };
     }
 
@@ -123,9 +127,9 @@ namespace SpaceExploration
         public RockMiner()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>() // Min and max units that can be extracted per attempt
+            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 3, 5 ) },
+                { 1, new Tuple<int, int, int>( 1, 3, 5 ) }, // Min and max units that can be extracted per attempt
                 { 2, new Tuple<int, int, int>( 2, 5, 10 ) },
                 { 3, new Tuple<int, int, int>( 3, 10, 20 ) }
             };
@@ -140,9 +144,9 @@ namespace SpaceExploration
         public GasSiphon()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>() // Min and max units that can be extracted per attempt
+            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 10, 15 ) },
+                { 1, new Tuple<int, int, int>( 1, 10, 15 ) }, // Min and max units that can be extracted per attempt
                 { 2, new Tuple<int, int, int>( 2, 15, 25 ) },
                 { 3, new Tuple<int, int, int>( 3, 25, 50 ) }
             };
@@ -157,11 +161,62 @@ namespace SpaceExploration
         public CollectClaw()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>() // Min and max units that can be extracted per attempt
+            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 1, 2 ) },
+                { 1, new Tuple<int, int, int>( 1, 1, 2 ) }, // Min and max units that can be extracted per attempt
                 { 2, new Tuple<int, int, int>( 2, 2, 3 ) },
                 { 3, new Tuple<int, int, int>( 3, 3, 5 ) }
+            };
+        }
+    }
+
+    struct CargoCapacity
+    {
+        public int Level;
+        public Dictionary<int, int> FunctionAttributes;
+
+        public CargoCapacity()
+        {
+            Level = 1;
+            FunctionAttributes = new Dictionary<int, int>()
+            {
+                {1, 200}, // Maximum cargo capacity for all elements
+                {2, 350},
+                {3, 500}
+            };
+        }
+    }
+
+    struct AirCapacity
+    {
+        public int Level;
+        public Dictionary<int, int> FunctionAttributes;
+
+        public AirCapacity()
+        {
+            Level = 1;
+            FunctionAttributes = new Dictionary<int, int>()
+            {
+                {1, 100}, // How much air the PLayer's ship can hold
+                {2, 200},
+                {3, 300}
+            };
+        }
+    }
+
+    struct HullIntegrity
+    {
+        public int Level;
+        public Dictionary<int, int> FunctionAttributes;
+
+        public HullIntegrity()
+        {
+            Level = 1;
+            FunctionAttributes = new Dictionary<int, int>()
+            {
+                {1, 75}, // How many hitpoints the ship hull has before failing.
+                {2, 150},
+                {3, 250}
             };
         }
     }
