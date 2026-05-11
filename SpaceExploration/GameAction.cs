@@ -337,7 +337,7 @@ namespace SpaceExploration
                 temperature = star.Temperature;
                 visited = star.Visited;
 
-                bodiesTable.AddRow(option, "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", $"visited");
+                bodiesTable.AddRow(option, "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", $"{visited}");
                 celObjects.Add(star);
             }
 
@@ -519,7 +519,6 @@ namespace SpaceExploration
             int minAmount;
             int maxAmount;
             int amount;
-            string action = "";
 
             for (int i = propertySkip; i < properties.Length; i++)
             {
@@ -547,7 +546,6 @@ namespace SpaceExploration
                         {
                             minAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item1;
                             maxAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item2;
-                            action = "mining";
                         }
                         else if (
                             elementType is Element.ElementType.Hydrogen ||
@@ -563,13 +561,11 @@ namespace SpaceExploration
                         {
                             minAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item1;
                             maxAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item2;
-                            action = "siphoning";
                         }
                         else
                         {
                             minAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item1;
                             maxAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item2;
-                            action = "collecting";
                         }
 
                         amount = Program.Rand.Next(minAmount, maxAmount + 1);
@@ -581,7 +577,6 @@ namespace SpaceExploration
                 }
             }
 
-            Console.WriteLine($"Now {action} for resources...");
             await Task.Delay(2000);
             await Element.TransactElements(elements);
         }
