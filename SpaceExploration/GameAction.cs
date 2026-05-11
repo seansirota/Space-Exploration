@@ -9,9 +9,10 @@ namespace SpaceExploration
 {
     class GameAction
     {
-        private const int ExtractAttempts = 3;
+        private const int ExtractAttempts = 1;
         public static bool gameComplete;
         public static int gameMode = 1;
+        public static int prevGameMode = 1;
 
         public static async Task InitiateWorld()
         {
@@ -31,21 +32,21 @@ namespace SpaceExploration
         public static async Task MainMenu()
         {
             bool invalidResponse;
-            string? currentStarSystem = (Player.currentSystem is not null) ? StarSystem.Systems[Player.currentSystem ?? 0].Name.ToString() : "None";
+            string? currentStarSystem = (Player.CurrentSystem is not null) ? StarSystem.Systems[Player.CurrentSystem ?? 0].Name.ToString() : "None";
 
             do
             {
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
                 1/J: Jump to new star system.
                 2/V: Visit current star system.
                 3/I: Check inventory.
-                4/F: Check functions.
+                4/F: Check ship functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -56,7 +57,7 @@ namespace SpaceExploration
                     await JumpSystem();
                 else if (playerEntry == "2" || playerEntry?.Equals("V", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    if (Player.currentSystem is null)
+                    if (Player.CurrentSystem is null)
                     {
                         Console.WriteLine("No current star system selected.");
                         await Task.Delay(2000);
@@ -73,7 +74,11 @@ namespace SpaceExploration
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
                     await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    prevGameMode = gameMode;
+                    gameMode = 4;
                     await CheckFunctions();
+                }
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
@@ -90,21 +95,21 @@ namespace SpaceExploration
         public static async Task SystemMenu()
         {
             bool invalidResponse;
-            string? currentStarSystem = (Player.currentSystem is not null) ? StarSystem.Systems[Player.currentSystem ?? 0].Name.ToString() : "None";
+            string? currentStarSystem = (Player.CurrentSystem is not null) ? StarSystem.Systems[Player.CurrentSystem ?? 0].Name.ToString() : "None";
 
             do
             {
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
                 1/L: Look back out to star systems.
                 2/V: View stars and planets in current star system.
                 3/I: Check inventory.
-                4/F: Check functions.
+                4/F: Check ship functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -122,7 +127,11 @@ namespace SpaceExploration
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
                     await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    prevGameMode = gameMode;
+                    gameMode = 4;
                     await CheckFunctions();
+                }
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
@@ -139,9 +148,9 @@ namespace SpaceExploration
         public static async Task VisitMenu()
         {
             bool invalidResponse;
-            string? currentStarSystem = (Player.currentSystem is not null) ? StarSystem.Systems[Player.currentSystem ?? 0].Name.ToString() : "None";
-            string? currentObject = (Player.currentObject is not null) ? Player.currentObject.Name : "None";
-            double fuel = Player.currentObject switch
+            string? currentStarSystem = (Player.CurrentSystem is not null) ? StarSystem.Systems[Player.CurrentSystem ?? 0].Name.ToString() : "None";
+            string? currentObject = (Player.CurrentObject is not null) ? Player.CurrentObject.Name : "None";
+            double fuel = Player.CurrentObject switch
             {
                 Star star => Star.StarCatalog[star.Type].FuelCost,
                 Planet planet => Planet.PlanetCatalog[planet.Type].FuelCost,
@@ -154,14 +163,14 @@ namespace SpaceExploration
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
                 Current star or planet: {currentObject}
-                Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
                 """);
                 Console.WriteLine($"""
                 Choose an action:
                 1/R: Return to star system. ({Math.Round(fuel, 2)} fuel units required)
                 2/E: Extract resources.
                 3/I: Check inventory.
-                4/F: Check functions.
+                4/F: Check ship functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -175,7 +184,11 @@ namespace SpaceExploration
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
                     await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    prevGameMode = gameMode;
+                    gameMode = 4;
                     await CheckFunctions();
+                }
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
@@ -191,12 +204,12 @@ namespace SpaceExploration
 
         public static async Task JumpSystem()
         {
-            string? currentStarSystem = (Player.currentSystem is not null) ? StarSystem.Systems[Player.currentSystem ?? 0].Name.ToString() : "None";
+            string? currentStarSystem = (Player.CurrentSystem is not null) ? StarSystem.Systems[Player.CurrentSystem ?? 0].Name.ToString() : "None";
 
             Console.WriteLine($"""
             Loading nearby star systems...
             Current star system: {currentStarSystem}
-            Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
             """);
             await Task.Delay(2000);
             
@@ -240,7 +253,6 @@ namespace SpaceExploration
                 AnsiConsole.Write(starSystemTable);
                 Console.WriteLine("Enter a number to choose a star system to jump to. Enter C to cancel.");
                 playerEntry = Console.ReadLine();
-
                 invalidResponse = false;
 
                 if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
@@ -260,7 +272,7 @@ namespace SpaceExploration
 
                 destinationSystem = StarSystem.Systems[nearbySystems[result - 1]];
 
-                if (StarSystem.GetDistance(destinationSystem) > Player.Fuel)
+                if (StarSystem.GetDistance(destinationSystem) > Player.ResourceAmounts[ResType.Fuel])
                 {
                     Console.WriteLine("Not enough fuel to jump to that star system. Choose another option.");
                     await Task.Delay(2000);
@@ -276,8 +288,8 @@ namespace SpaceExploration
             if (destinationSystem is null)
                 return;
 
-            Player.Fuel -= StarSystem.GetDistance(StarSystem.Systems[destinationSystem.ID]);
-            Player.currentSystem = destinationSystem.ID;
+            Player.ResourceAmounts[ResType.Fuel] -= StarSystem.GetDistance(StarSystem.Systems[destinationSystem.ID]);
+            Player.CurrentSystem = destinationSystem.ID;
             Player.X = destinationSystem.X;
             Player.Y = destinationSystem.Y;
             destinationSystem.Visited = true;
@@ -287,7 +299,7 @@ namespace SpaceExploration
 
         public static async Task VisitStarPlanet()
         {
-            if (Player.currentSystem == null)
+            if (Player.CurrentSystem == null)
             {
                 Console.WriteLine("You're not located within a star system.");
                 await Task.Delay(2000);
@@ -295,12 +307,12 @@ namespace SpaceExploration
             }
 
             Console.WriteLine($"""
-            Loading stars and planets within {StarSystem.Systems[Player.currentSystem ?? 0].Name}...
-            Current fuel level: {Math.Round(Player.Fuel, 2)} / {Player.FuelCap.FunctionAttributes[Player.FuelCap.Level]}
+            Loading stars and planets within {StarSystem.Systems[Player.CurrentSystem ?? 0].Name}...
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
             """);
             await Task.Delay(2000);
 
-            if (Player.currentSystem is not int currentSystem)
+            if (Player.CurrentSystem is not int currentSystem)
                 return;
 
             List<Star> stars = StarSystem.Systems[currentSystem].Stars;
@@ -368,7 +380,6 @@ namespace SpaceExploration
                 AnsiConsole.Write(bodiesTable);
                 Console.WriteLine("Enter a number to choose a star or planet to visit. Enter C to cancel.");
                 playerEntry = Console.ReadLine();
-
                 invalidResponse = false;
 
                 if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
@@ -389,8 +400,8 @@ namespace SpaceExploration
                 destinationBody = celObjects[result - 1];
 
                 if (
-                    result <= starBorder && Star.StarCatalog[((Star)destinationBody).Type].FuelCost > Player.Fuel ||
-                    result > starBorder && Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost > Player.Fuel
+                    result <= starBorder && Star.StarCatalog[((Star)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResType.Fuel] ||
+                    result > starBorder && Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResType.Fuel]
                 )
                 {
                     Console.WriteLine("Not enough fuel to visit that star or planet. Choose another option.");
@@ -418,11 +429,11 @@ namespace SpaceExploration
                 await Task.Delay(2000);
 
                 if (result <= starBorder)
-                    Player.Fuel -= Star.StarCatalog[((Star)destinationBody).Type].FuelCost;
+                    Player.ResourceAmounts[ResType.Fuel] -= Star.StarCatalog[((Star)destinationBody).Type].FuelCost;
                 else
-                    Player.Fuel -= Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost;
+                    Player.ResourceAmounts[ResType.Fuel] -= Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost;
 
-                Player.currentObject = destinationBody;
+                Player.CurrentObject = destinationBody;
                 destinationBody.Visited = true;
                 gameMode = 3;
             } while (invalidResponse);
@@ -430,58 +441,169 @@ namespace SpaceExploration
 
         public static async Task CheckInventory()
         {
-            Console.WriteLine($"""
-            Now loading all resource amounts...
-            Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.CargoCap.FunctionAttributes[Player.CargoCap.Level]}
-            """);
-            await Task.Delay(2000);
+            bool stayInMenu = false;
 
-            Table elementsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
-            elementsTable.AddColumn(new TableColumn("Resource").NoWrap());
-            elementsTable.AddColumn(new TableColumn("Amount").NoWrap());
-
-            string? element;
-            int amount;
-
-            foreach (KeyValuePair<Element.ElementType, int> elementType in Player.ElementAmounts)
+            do
             {
-                element = Element.ElementCatalog[elementType.Key].DisplayName;
-                amount = elementType.Value;
-                elementsTable.AddRow($"{element}", $"{amount} units");
-            }
+                Console.WriteLine($"""
+                Now loading inventory...
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunType.CargoCapacity)}
+                """);
+                await Task.Delay(2000);
 
-            string? playerEntry;
+                Table elementsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                elementsTable.AddColumn(new TableColumn("Option").NoWrap());
+                elementsTable.AddColumn(new TableColumn("Element").NoWrap());
+                elementsTable.AddColumn(new TableColumn("Amount").NoWrap());
+
+                int count = 1;
+                string option;
+                string? element;
+                int amount;
+
+                foreach (KeyValuePair<Element.ElementType, int> elementType in Player.ElementAmounts)
+                {
+                    option = count++.ToString();
+                    element = Element.ElementCatalog[elementType.Key].DisplayName;
+                    amount = elementType.Value;
+                    elementsTable.AddRow(option, element!, $"{amount} units");
+                }
+
+                string? playerEntry;
+                bool invalidResponse;
+                Element.ElementType? rawOption = null;
+
+                do
+                {
+                    AnsiConsole.Write(elementsTable);
+                    Console.WriteLine("Enter a number to choose an element to discard. Enter X to exit back to the previous menu.");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting inventory menu...");
+                        await Task.Delay(2000);
+                        return;
+                    }
+
+                    if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                        continue;
+                    }
+
+                    rawOption = Player.ElementAmounts.ElementAt(result - 1).Key;
+                } while (invalidResponse);
+
+                if (rawOption is not Element.ElementType discardOption)
+                    return;
+
+                Dictionary<Element.ElementType, int> discardElement = new Dictionary<Element.ElementType, int>();
+                int discardAmount;
+
+                do
+                {
+                    Console.WriteLine($"How many units of {Element.ElementCatalog[discardOption].DisplayName} do you wish to discard?");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (!int.TryParse(playerEntry, out int result) || result < 0 || result > Player.ElementAmounts[discardOption])
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                        continue;
+                    }
+
+                    discardAmount = result;
+                    discardElement[discardOption] = -discardAmount;
+                } while (invalidResponse);
+
+                Console.WriteLine("Discarding elements...");
+                await Task.Delay(2000);
+                bool discarded = await Element.TransactElements(discardElement, true);
+                Console.WriteLine(discarded ? "Completed disposal." : "Discard canceled.");
+                await Task.Delay(2000);
+
+                do
+                {
+                    Console.WriteLine("Do you wish to continuing checking out the inventory? (Y/N)");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
+                        stayInMenu = true;
+                    else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting inventory menu...");
+                        await Task.Delay(2000);
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid command. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                    }
+                } while (invalidResponse);
+            } while (stayInMenu);
+        }
+
+        public static async Task CheckFunctions()
+        {
             bool invalidResponse;
 
             do
             {
-                AnsiConsole.Write(elementsTable);
-                Console.WriteLine("Enter X to exit back to the previous menu.");
-                playerEntry = Console.ReadLine();
+                invalidResponse = false;
 
-                if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                Console.WriteLine($"""
+                Loading player and ship information...
+                Current money: {Player.ResourceAmounts[ResType.Money]} chromids
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunType.CargoCapacity)}
+                Current hull integrity: {Math.Round(Player.ResourceAmounts[ResType.Hull], 2)} / {Player.GetFunction<double>(FunType.HullIntegrity)}
+                Current air level: {Player.ResourceAmounts[ResType.Air]} / {Player.GetFunction<int>(FunType.AirCapacity)}
+                """);
+                await Task.Delay(2000);
+                Console.WriteLine($"""
+                Choose an action:
+                1/N: Convert elements into ship resources.
+                2/U: View and upgrade ship functions.
+                3/A: Configure ship automations.
+                4/X: Exit ship functions menu.
+                """);
+
+                string? playerEntry = Console.ReadLine();
+
+                if (playerEntry == "1" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                    await Ship.ConvertResources();
+                else if (playerEntry == "2" || playerEntry?.Equals("U", StringComparison.OrdinalIgnoreCase) == true)
+                    await Ship.UpgradeFunctions();
+                else if (playerEntry == "3" || playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
+                    await Ship.ConfigureAutomations();
+                else if (playerEntry == "4" || playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine("Exiting inventory menu...");
                     await Task.Delay(2000);
+                    gameMode = prevGameMode;
                     return;
                 }
                 else
                 {
-                    Console.WriteLine("Invalid option. Try again.");
+                    Console.WriteLine("Invalid command. Try again.");
                     await Task.Delay(2000);
                     invalidResponse = true;
                 }
             } while (invalidResponse);
         }
 
-        public static async Task CheckFunctions()
-        {
-            
-        }
-
         public static async Task<bool> AddNote()
         {
-            if (Player.currentSystem is not int currentSystem)
+            if (Player.CurrentSystem is not int currentSystem)
             {
                 Console.WriteLine("Not a valid star system. Returning to main selection menu...");
                 await Task.Delay(2000);
@@ -502,7 +624,7 @@ namespace SpaceExploration
 
         public static async Task ExtractResources()
         {
-            CelObjectGeneric? currentObject = Player.currentObject;
+            CelObjectGeneric? currentObject = Player.CurrentObject;
             (int propertySkip, object? catalogData, Dictionary<int, Element.ElementType>? indexData) = currentObject switch
             {
                 Star star => (7, (object?)Star.StarCatalog[star.Type], (Dictionary<int, Element.ElementType>?)Star.StarIndex),
@@ -544,8 +666,8 @@ namespace SpaceExploration
                             elementType is Element.ElementType.Copper
                         )
                         {
-                            minAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item1;
-                            maxAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.RockMiner).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.RockMiner).Item2;
                         }
                         else if (
                             elementType is Element.ElementType.Hydrogen ||
@@ -559,13 +681,13 @@ namespace SpaceExploration
                             elementType is Element.ElementType.CarbonDioxide
                         )
                         {
-                            minAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item1;
-                            maxAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.GasSiphon).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.GasSiphon).Item2;
                         }
                         else
                         {
-                            minAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item1;
-                            maxAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.CollectClaw).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.CollectClaw).Item2;
                         }
 
                         amount = Program.Rand.Next(minAmount, maxAmount + 1);
@@ -577,27 +699,30 @@ namespace SpaceExploration
                 }
             }
 
+            Console.WriteLine("Beginning extraction of resources...");
             await Task.Delay(2000);
-            await Element.TransactElements(elements);
+            bool extracted = await Element.TransactElements(elements, true);
+            Console.WriteLine(extracted ? "Completed resource extraction." : "Extraction canceled.");
+            await Task.Delay(2000);
         }
 
         public static async Task ReturnToStarSystem()
         {
-            double fuel = Player.currentObject switch
+            double fuel = Player.CurrentObject switch
             {
                 Star star => Star.StarCatalog[star.Type].FuelCost,
                 Planet planet => Planet.PlanetCatalog[planet.Type].FuelCost,
                 _ => 0
             } * 2;
 
-            if (fuel > Player.Fuel)
+            if (fuel > Player.ResourceAmounts[ResType.Fuel])
             {
                 Console.WriteLine("You don't have enough fuel to leave the planet or star.");
                 await Task.Delay(2000);
                 return;
             }
 
-            CelObjectGeneric? current = Player.currentObject;
+            CelObjectGeneric? current = Player.CurrentObject;
 
             if (current is null)
             {
@@ -605,8 +730,8 @@ namespace SpaceExploration
                 return;
             }
 
-            Player.Fuel -= fuel;
-            Player.currentObject = null;
+            Player.ResourceAmounts[ResType.Fuel] -= fuel;
+            Player.CurrentObject = null;
             Console.WriteLine($"Now leaving {current.Name}...");
             await Task.Delay(2000);
             gameMode = 2;
@@ -616,9 +741,9 @@ namespace SpaceExploration
         {
             string? type = null;
 
-            for (int i = 0; i < Player.CelScan.Level; i++)
+            for (int i = 0; i < ((CelestialScanner)Player.Functions[FunType.CelestialScanner]).Level; i++)
             {
-                type = Player.CelScan.FunctionAttributes[i + 1].Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
+                type = ((CelestialScanner)Player.Functions[FunType.CelestialScanner]).FunctionAttributes[i + 1].Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
 
                 if (type is not null)
                     break;

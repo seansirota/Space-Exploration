@@ -34,7 +34,7 @@ namespace SpaceExploration
             Dictionary<int, Tuple<int, int>> excludeCoords = new Dictionary<int, Tuple<int, int>>();
             int playerX = Player.X;
             int playerY = Player.Y;
-            int playerR = Player.SysScan.FunctionAttributes[Player.SysScan.Level];
+            int playerR = ((SystemScanner)Player.Functions[FunType.SystemScanner]).FunctionAttributes[((SystemScanner)Player.Functions[FunType.SystemScanner]).Level];
 
             int surfaceArea = (int)Math.Pow(playerR * 2 + 1, 2);
             int exclusionArea = (int)Math.Pow(ExclusionRadius * 2 + 1, 2);
@@ -58,7 +58,7 @@ namespace SpaceExploration
             }
 
             allowedGens -= excludeCoords.Count;
-            if (Player.currentSystem == null)
+            if (Player.CurrentSystem == null)
                 excludeCoords[0] = new Tuple<int, int>(playerX, playerY);
 
             int randX;
@@ -108,7 +108,7 @@ namespace SpaceExploration
             List<int> nearbySystems = new List<int>();
             int playerX = Player.X;
             int playerY = Player.Y;
-            int playerR = Player.SysScan.FunctionAttributes[Player.SysScan.Level];
+            int playerR = ((SystemScanner)Player.Functions[FunType.SystemScanner]).FunctionAttributes[((SystemScanner)Player.Functions[FunType.SystemScanner]).Level];
 
             int leftBound = playerX - playerR;
             int rightBound = playerX + playerR;

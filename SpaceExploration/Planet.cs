@@ -2,7 +2,7 @@ using System;
 
 namespace SpaceExploration
 {
-    class Planet : CelObject<Planet.PlanetType>
+    class Planet : CelObject<PlanetType>
     {
         private const int PlanetPowerBase = 2;
         public int ID { get; set; }
@@ -151,8 +151,9 @@ namespace SpaceExploration
             int CarbonDioxideChance,
             int AntimatterChance
         );
+    }
 
-        public enum PlanetType
+    public enum PlanetType
         {
             Rock, // Basic types, detectable with level 1 celestial sensors
             Ice,
@@ -167,5 +168,4 @@ namespace SpaceExploration
             Ruined,
             Dark
         }
-    }
 }

@@ -4,27 +4,28 @@ namespace SpaceExploration
 {
     class Element
     {
-        public static async Task TransactElements(Dictionary<ElementType, int> elements, bool verbose = false)
+        public static async Task<bool> TransactElements(Dictionary<ElementType, int> elements, bool verbose = false)
         {
             int have;
             int delta;
             int cargo = Player.ElementAmounts.Values.Sum();
-            int cap = Player.CargoCap.FunctionAttributes[Player.CargoCap.Level];
+            int cap = ((CargoCapacity)Player.Functions[FunType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunType.CargoCapacity]).Level];
             string? name;
             bool invalidResponse;
+            bool response = false;
 
             if (cargo + elements.Values.Sum() > cap)
             {
                 Console.WriteLine($"You don't have enough cargo capacity for this transaction.");
                 await Task.Delay(2000);
-                return;
+                return response;
             }
 
             if (cargo + elements.Values.Sum() < 0)
             {
                 Console.WriteLine($"You don't have enough resources to complete this transaction.");
                 await Task.Delay(2000);
-                return;
+                return response;
             }
             
             foreach (KeyValuePair<ElementType, int> element in elements)
@@ -37,15 +38,15 @@ namespace SpaceExploration
                 {
                     if (verbose)
                     {
-                        Console.WriteLine($"You have {have} units of {name} and need {delta} units.");
-                        await Task.Delay(1000);
+                        Console.WriteLine($"You have {have} units of {name} and will give up {delta} units.");
+                        await Task.Delay(500);
                     }
 
                     if (have < -delta)
                     {
                         Console.WriteLine($"You don't have enough {name}.");
                         await Task.Delay(2000);
-                        return;
+                        return response;
                     }
                 }
                 else
@@ -53,7 +54,7 @@ namespace SpaceExploration
                     if (verbose)
                     {
                         Console.WriteLine($"You have {have} units of {name} and will get {delta} units.");
-                        await Task.Delay(1000);
+                        await Task.Delay(500);
                     }
 
                     if (cargo + delta > cap)
@@ -64,7 +65,6 @@ namespace SpaceExploration
 
                             Console.WriteLine($"Your current cargo capacity of {cargo} won't have room for {delta - cap - cargo} units of {name}, the rest will be discarded.");
                             Console.WriteLine("Proceed anyway? (Y/N)");
-
                             string? playerEntry = Console.ReadLine();
 
                             if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
@@ -79,7 +79,7 @@ namespace SpaceExploration
                             {
                                 Console.WriteLine("Canceling transaction...");
                                 await Task.Delay(2000);
-                                return;
+                                return response;
                             }
                             else
                             {
@@ -101,17 +101,15 @@ namespace SpaceExploration
                 if (verbose)
                 {
                     Console.WriteLine($"Change of {delta} units of {name}...");
-                    await Task.Delay(1000);
+                    await Task.Delay(500);
                 }
 
                 Player.ElementAmounts[element.Key] += delta;
             }
 
-            if (verbose)
-            {
-                Console.WriteLine("Transaction complete.");
-                await Task.Delay(2000);
-            }
+            await Task.Delay(500);
+            response = true;
+            return response;
         }
 
         public static readonly Dictionary<ElementType, ElementTypeData> ElementCatalog = new Dictionary<ElementType, ElementTypeData>()

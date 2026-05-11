@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace SpaceExploration
 {
-    class Star : CelObject<Star.StarType>
+    class Star : CelObject<StarType>
     {
         private const int StarPowerBase = 3;
         public int ID { get; set; }
@@ -118,8 +118,9 @@ namespace SpaceExploration
             int OxygenChance,
             int AntimatterChance
         );
+    }
 
-        public enum StarType
+    public enum StarType
         {
             RedDwarf,
             OrangeDwarf,
@@ -130,5 +131,4 @@ namespace SpaceExploration
             Pulsar,
             BlackHole
         }
-    }
 }

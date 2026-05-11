@@ -7,21 +7,28 @@ namespace SpaceExploration
     {
         public static int X { get; set; } = 0;
         public static int Y { get; set; } = 0;
-        public static int? currentSystem { get; set; } = null;
-        public static CelObjectGeneric? currentObject = null;
-        public static SystemScanner SysScan { get; set; } = new SystemScanner();
-        public static CelestialScanner CelScan { get; set; } = new CelestialScanner();
-        public static FuelCapacity FuelCap { get; set; } = new FuelCapacity();
-        public static RockMiner RockMiner { get; set; } = new RockMiner();
-        public static GasSiphon GasSiphon { get; set; } = new GasSiphon();
-        public static CollectClaw CollectClaw { get; set; } = new CollectClaw();
-        public static CargoCapacity CargoCap { get; set; } = new CargoCapacity();
-        public static AirCapacity AirCap { get; set; } = new AirCapacity();
-        public static HullIntegrity HullInt { get; set; } = new HullIntegrity();
-        public static int Cargo { get; set; } = CargoCap.FunctionAttributes[CargoCap.Level];
-        public static double Fuel { get; set; } = FuelCap.FunctionAttributes[FuelCap.Level];
-        public static double Hull { get; set; } = HullInt.FunctionAttributes[HullInt.Level];
-        public static double Air { get; set; } = AirCap.FunctionAttributes[AirCap.Level];
+        public static int? CurrentSystem { get; set; } = null;
+        public static CelObjectGeneric? CurrentObject = null;
+        public static Dictionary<FunType, IFunction> Functions = new Dictionary<FunType, IFunction>()
+        {
+            [FunType.SystemScanner] = new SystemScanner(),
+            [FunType.CelestialScanner] = new CelestialScanner(),
+            [FunType.RockMiner] = new RockMiner(),
+            [FunType.GasSiphon] = new GasSiphon(),
+            [FunType.CollectClaw] = new CollectClaw(),
+            [FunType.CargoCapacity] = new CargoCapacity(),
+            [FunType.FuelCapacity] = new FuelCapacity(),
+            [FunType.HullIntegrity] = new HullIntegrity(),
+            [FunType.AirCapacity] = new AirCapacity()
+        };
+        public static Dictionary<ResType, double> ResourceAmounts = new Dictionary<ResType, double>()
+        {
+            [ResType.Money] = 0,
+            [ResType.Cargo] = GetFunction<int>(FunType.CargoCapacity),
+            [ResType.Fuel] = GetFunction<double>(FunType.FuelCapacity),
+            [ResType.Hull] = GetFunction<double>(FunType.HullIntegrity),
+            [ResType.Air] = GetFunction<int>(FunType.AirCapacity)
+        };
         public static Dictionary<Element.ElementType, int> ElementAmounts = new Dictionary<Element.ElementType, int>()
         {
             [Element.ElementType.Hydrogen] = 0,
@@ -45,12 +52,28 @@ namespace SpaceExploration
             [Element.ElementType.CarbonDioxide] = 0,
             [Element.ElementType.Antimatter] = 0,
         };
+
+        public static T GetFunction<T>(FunType funType)
+        {
+            IFunction<T> function = (IFunction<T>)Functions[funType];
+
+            return function.FunctionAttributes[function.Level];
+        }
+    }
+    public interface IFunction
+    {
+        public int Level { get; }
     }
 
-    struct SystemScanner
+    public interface IFunction<T> : IFunction
     {
-        public int Level;
-        public Dictionary<int, int> FunctionAttributes;
+        public Dictionary<int, T> FunctionAttributes { get; }
+    }
+
+    public class SystemScanner : IFunction<int>
+    {
+        public int Level { get; set; }
+        public Dictionary<int, int> FunctionAttributes { get; set; }
 
         public SystemScanner()
         {
@@ -64,53 +87,53 @@ namespace SpaceExploration
         }
     }
 
-    struct CelestialScanner
+    public class CelestialScanner : IFunction<List<PlanetType>>
     {
-        public int Level;
-        public Dictionary<int, List<Planet.PlanetType>> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, List<PlanetType>> FunctionAttributes { get; set; }
 
         public CelestialScanner()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, List<Planet.PlanetType>>()
+            FunctionAttributes = new Dictionary<int, List<PlanetType>>()
             {
-                {1, new List<Planet.PlanetType>() // Planet types detectablable within star system
+                {1, new List<PlanetType>() // Planet types detectablable within star system
                     {
-                        Planet.PlanetType.Rock,
-                        Planet.PlanetType.Ice,
-                        Planet.PlanetType.Gas,
-                        Planet.PlanetType.Terran
+                        PlanetType.Rock,
+                        PlanetType.Ice,
+                        PlanetType.Gas,
+                        PlanetType.Terran
                     }
                 },
-                {2, new List<Planet.PlanetType>()
+                {2, new List<PlanetType>()
                     {
-                        Planet.PlanetType.Toxic,
-                        Planet.PlanetType.Volcanic,
-                        Planet.PlanetType.Ocean,
-                        Planet.PlanetType.Desert
+                        PlanetType.Toxic,
+                        PlanetType.Volcanic,
+                        PlanetType.Ocean,
+                        PlanetType.Desert
                     }
                 },
-                {3, new List<Planet.PlanetType>()
+                {3, new List<PlanetType>()
                     {
-                        Planet.PlanetType.Abandoned,
-                        Planet.PlanetType.Synthetic,
-                        Planet.PlanetType.Ruined,
-                        Planet.PlanetType.Dark
+                        PlanetType.Abandoned,
+                        PlanetType.Synthetic,
+                        PlanetType.Ruined,
+                        PlanetType.Dark
                     }
                 }
             };
         }
     }
 
-    struct FuelCapacity
+    public class FuelCapacity : IFunction<double>
     {
-        public int Level;
-        public Dictionary<int, int> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, double> FunctionAttributes { get; set; }
 
         public FuelCapacity()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, int>()
+            FunctionAttributes = new Dictionary<int, double>()
             {
                 {1, 50}, // How much fuel the PLayer's ship can hold
                 {2, 100},
@@ -119,10 +142,10 @@ namespace SpaceExploration
         }
     }
 
-    struct RockMiner
+    public class RockMiner : IFunction<Tuple<int, int>>
     {
-        public int Level;
-        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes { get; set; }
 
         public RockMiner()
         {
@@ -130,33 +153,33 @@ namespace SpaceExploration
             FunctionAttributes = new Dictionary<int, Tuple<int, int>>()
             {
                 { 1, new Tuple<int, int>( 3, 5 ) }, // Min and max units that can be extracted per attempt
-                { 2, new Tuple<int, int>( 5, 10 ) },
-                { 3, new Tuple<int, int>( 10, 20 ) }
+                { 2, new Tuple<int, int>( 5, 7 ) },
+                { 3, new Tuple<int, int>( 7, 10 ) }
             };
         }
     }
 
-    struct GasSiphon
+    public class GasSiphon : IFunction<Tuple<int, int>>
     {
-        public int Level;
-        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes { get; set; }
 
         public GasSiphon()
         {
             Level = 1;
             FunctionAttributes = new Dictionary<int, Tuple<int, int>>()
             {
-                { 1, new Tuple<int, int>( 10, 15 ) }, // Min and max units that can be extracted per attempt
-                { 2, new Tuple<int, int>( 15, 25 ) },
-                { 3, new Tuple<int, int>( 25, 50 ) }
+                { 1, new Tuple<int, int>( 5, 8 ) }, // Min and max units that can be extracted per attempt
+                { 2, new Tuple<int, int>( 8, 12 ) },
+                { 3, new Tuple<int, int>( 12, 18 ) }
             };
         }
     }
 
-    struct CollectClaw
+    public class CollectClaw : IFunction<Tuple<int, int>>
     {
-        public int Level;
-        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes { get; set; }
 
         public CollectClaw()
         {
@@ -170,10 +193,10 @@ namespace SpaceExploration
         }
     }
 
-    struct CargoCapacity
+    public class CargoCapacity : IFunction<int>
     {
-        public int Level;
-        public Dictionary<int, int> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, int> FunctionAttributes { get; set; }
 
         public CargoCapacity()
         {
@@ -187,10 +210,10 @@ namespace SpaceExploration
         }
     }
 
-    struct AirCapacity
+    public class AirCapacity : IFunction<int>
     {
-        public int Level;
-        public Dictionary<int, int> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, int> FunctionAttributes { get; set; }
 
         public AirCapacity()
         {
@@ -204,20 +227,42 @@ namespace SpaceExploration
         }
     }
 
-    struct HullIntegrity
+    public class HullIntegrity : IFunction<double>
     {
-        public int Level;
-        public Dictionary<int, int> FunctionAttributes;
+        public int Level { get; set; }
+        public Dictionary<int, double> FunctionAttributes { get; set; }
 
         public HullIntegrity()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, int>()
+            FunctionAttributes = new Dictionary<int, double>()
             {
                 {1, 75}, // How many hitpoints the ship hull has before failing.
                 {2, 150},
                 {3, 250}
             };
         }
+    }
+
+    public enum ResType
+    {
+        Money,
+        Cargo,
+        Fuel,
+        Hull,
+        Air
+    }
+
+    public enum FunType
+    {
+        SystemScanner,
+        CelestialScanner,
+        RockMiner,
+        GasSiphon,
+        CollectClaw,
+        CargoCapacity,
+        FuelCapacity,
+        HullIntegrity,
+        AirCapacity
     }
 }
