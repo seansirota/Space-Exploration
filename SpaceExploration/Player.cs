@@ -9,10 +9,6 @@ namespace SpaceExploration
         public static int Y { get; set; } = 0;
         public static int? currentSystem { get; set; } = null;
         public static CelObjectGeneric? currentObject = null;
-        public static int Cargo { get; set; } = CargoCap.FunctionAttributes[CargoCap.Level];
-        public static double Fuel { get; set; } = FuelCap.FunctionAttributes[FuelCap.Level];
-        public static double Hull { get; set; } = HullInt.FunctionAttributes[HullInt.Level];
-        public static double Air { get; set; } = AirCap.FunctionAttributes[AirCap.Level];
         public static SystemScanner SysScan { get; set; } = new SystemScanner();
         public static CelestialScanner CelScan { get; set; } = new CelestialScanner();
         public static FuelCapacity FuelCap { get; set; } = new FuelCapacity();
@@ -22,6 +18,10 @@ namespace SpaceExploration
         public static CargoCapacity CargoCap { get; set; } = new CargoCapacity();
         public static AirCapacity AirCap { get; set; } = new AirCapacity();
         public static HullIntegrity HullInt { get; set; } = new HullIntegrity();
+        public static int Cargo { get; set; } = CargoCap.FunctionAttributes[CargoCap.Level];
+        public static double Fuel { get; set; } = FuelCap.FunctionAttributes[FuelCap.Level];
+        public static double Hull { get; set; } = HullInt.FunctionAttributes[HullInt.Level];
+        public static double Air { get; set; } = AirCap.FunctionAttributes[AirCap.Level];
         public static Dictionary<Element.ElementType, int> ElementAmounts = new Dictionary<Element.ElementType, int>()
         {
             [Element.ElementType.Hydrogen] = 0,
@@ -122,16 +122,16 @@ namespace SpaceExploration
     struct RockMiner
     {
         public int Level;
-        public Dictionary<int, Tuple<int, int, int>> FunctionAttributes;
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
 
         public RockMiner()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
+            FunctionAttributes = new Dictionary<int, Tuple<int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 3, 5 ) }, // Min and max units that can be extracted per attempt
-                { 2, new Tuple<int, int, int>( 2, 5, 10 ) },
-                { 3, new Tuple<int, int, int>( 3, 10, 20 ) }
+                { 1, new Tuple<int, int>( 3, 5 ) }, // Min and max units that can be extracted per attempt
+                { 2, new Tuple<int, int>( 5, 10 ) },
+                { 3, new Tuple<int, int>( 10, 20 ) }
             };
         }
     }
@@ -139,16 +139,16 @@ namespace SpaceExploration
     struct GasSiphon
     {
         public int Level;
-        public Dictionary<int, Tuple<int, int, int>> FunctionAttributes;
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
 
         public GasSiphon()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
+            FunctionAttributes = new Dictionary<int, Tuple<int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 10, 15 ) }, // Min and max units that can be extracted per attempt
-                { 2, new Tuple<int, int, int>( 2, 15, 25 ) },
-                { 3, new Tuple<int, int, int>( 3, 25, 50 ) }
+                { 1, new Tuple<int, int>( 10, 15 ) }, // Min and max units that can be extracted per attempt
+                { 2, new Tuple<int, int>( 15, 25 ) },
+                { 3, new Tuple<int, int>( 25, 50 ) }
             };
         }
     }
@@ -156,16 +156,16 @@ namespace SpaceExploration
     struct CollectClaw
     {
         public int Level;
-        public Dictionary<int, Tuple<int, int, int>> FunctionAttributes;
+        public Dictionary<int, Tuple<int, int>> FunctionAttributes;
 
         public CollectClaw()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, Tuple<int, int, int>>()
+            FunctionAttributes = new Dictionary<int, Tuple<int, int>>()
             {
-                { 1, new Tuple<int, int, int>( 1, 1, 2 ) }, // Min and max units that can be extracted per attempt
-                { 2, new Tuple<int, int, int>( 2, 2, 3 ) },
-                { 3, new Tuple<int, int, int>( 3, 3, 5 ) }
+                { 1, new Tuple<int, int>( 1, 2 ) }, // Min and max units that can be extracted per attempt
+                { 2, new Tuple<int, int>( 2, 3 ) },
+                { 3, new Tuple<int, int>( 3, 5 ) }
             };
         }
     }

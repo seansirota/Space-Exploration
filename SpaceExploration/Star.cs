@@ -81,16 +81,26 @@ namespace SpaceExploration
             }
         }
 
+        public static readonly Dictionary<int, Element.ElementType> StarIndex = new Dictionary<int, Element.ElementType>()
+        {
+            [7] = Element.ElementType.Hydrogen,
+            [8] = Element.ElementType.Helium,
+            [9] = Element.ElementType.Carbon,
+            [10] = Element.ElementType.Nitrogen,
+            [11] = Element.ElementType.Oxygen,
+            [12] = Element.ElementType.Antimatter
+        };
+
         public static readonly Dictionary<StarType, StarTypeData> StarCatalog = new Dictionary<StarType, StarTypeData>()
         {
-            [StarType.RedDwarf] = new("Red Dwarf", 45, 2, 2000, 4000, 0.08, 0.5, 95, 70, 5, 2, 1),
-            [StarType.OrangeDwarf] = new("Orange Dwarf", 20, 2, 4000, 5300, 0.5, 0.8, 90, 65, 8, 4, 1),
-            [StarType.YellowDwarf] = new("Yellow Dwarf", 13, 2, 5300, 6000, 0.8, 1.2, 85, 60, 10, 6, 1),
-            [StarType.RedGiant] = new("Red Giant", 7, 3, 3000, 5000, 0.8, 8, 55, 80, 45, 20, 2),
-            [StarType.BlueGiant] = new("Blue Giant", 3, 3, 10000, 40000, 8, 50, 75, 85, 35, 40, 2),
-            [StarType.WhiteDwarf] = new("White Dwarf", 9, 2, 8000, 40000, 0.17, 1.4, 10, 15, 85, 80, 5),
-            [StarType.Pulsar] = new("Pulsar", 1, 4, 600000, 1000000, 1.4, 3, 0, 0, 5, 5, 80),
-            [StarType.BlackHole] = new("Black Hole", 2, 1, 0, 0, 3, 10, 0, 0, 0, 0, 0)
+            [StarType.RedDwarf] = new("Red Dwarf", 45, 2, 2000, 4000, 0.08, 0.5, 95, 70, 5, 3, 2, 1),
+            [StarType.OrangeDwarf] = new("Orange Dwarf", 20, 2, 4000, 5300, 0.5, 0.8, 90, 65, 8, 6, 4, 1),
+            [StarType.YellowDwarf] = new("Yellow Dwarf", 13, 2, 5300, 6000, 0.8, 1.2, 85, 60, 10, 8, 6, 1),
+            [StarType.RedGiant] = new("Red Giant", 7, 3, 3000, 5000, 0.8, 8, 55, 80, 45, 32, 20, 2),
+            [StarType.BlueGiant] = new("Blue Giant", 3, 3, 10000, 40000, 8, 50, 75, 85, 35, 35, 40, 2),
+            [StarType.WhiteDwarf] = new("White Dwarf", 9, 2, 8000, 40000, 0.17, 1.4, 10, 15, 85, 90, 80, 5),
+            [StarType.Pulsar] = new("Pulsar", 1, 4, 600000, 1000000, 1.4, 3, 0, 0, 5, 5, 5, 80),
+            [StarType.BlackHole] = new("Black Hole", 2, 1, 0, 0, 3, 10, 0, 0, 0, 0, 0, 0)
         };
 
         public sealed record StarTypeData(
@@ -104,6 +114,7 @@ namespace SpaceExploration
             int HydrogenChance, // Chance to extract in one attempt
             int HeliumChance,
             int CarbonChance,
+            int NitrogenChance,
             int OxygenChance,
             int AntimatterChance
         );

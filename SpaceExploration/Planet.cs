@@ -83,6 +83,30 @@ namespace SpaceExploration
             }
         }
 
+        public static readonly Dictionary<int, Element.ElementType> PlanetIndex = new Dictionary<int, Element.ElementType>()
+        {
+            [6] = Element.ElementType.Hydrogen,
+            [7] = Element.ElementType.Helium,
+            [8] = Element.ElementType.Carbon,
+            [9] = Element.ElementType.Nitrogen,
+            [10] = Element.ElementType.Oxygen,
+            [11] = Element.ElementType.Magnesium,
+            [12] = Element.ElementType.Aluminum,
+            [13] = Element.ElementType.Silicon,
+            [14] = Element.ElementType.Sulfur,
+            [15] = Element.ElementType.Chlorine,
+            [16] = Element.ElementType.Titanium,
+            [17] = Element.ElementType.Iron,
+            [18] = Element.ElementType.Nickel,
+            [19] = Element.ElementType.Copper,
+            [20] = Element.ElementType.Uranium,
+            [21] = Element.ElementType.Water,
+            [22] = Element.ElementType.Methane,
+            [23] = Element.ElementType.Ammonia,
+            [24] = Element.ElementType.CarbonDioxide,
+            [25] = Element.ElementType.Antimatter
+        };
+
         public static readonly Dictionary<PlanetType, PlanetTypeData> PlanetCatalog = new Dictionary<PlanetType, PlanetTypeData>()
         {
             [PlanetType.Rock] = new("Rock", 25, 0, 1, 0.1, 2, 5, 2, 10, 5, 5, 40, 35, 60, 15, 5, 20, 70, 40, 25, 5, 5, 0, 0, 10, 0),

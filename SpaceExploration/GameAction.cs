@@ -1,4 +1,7 @@
 using System;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime;
 using System.Threading.Tasks;
 using Spectre.Console;
 
@@ -6,6 +9,7 @@ namespace SpaceExploration
 {
     class GameAction
     {
+        private const int ExtractAttempts = 3;
         public static bool gameComplete;
         public static int gameMode = 1;
 
@@ -67,13 +71,13 @@ namespace SpaceExploration
                     }
                 }
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckInventory();
+                    await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckFunctions();
+                    await CheckFunctions();
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
-                    ViewLogbook();
+                    await ViewLogbook();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -116,13 +120,13 @@ namespace SpaceExploration
                 else if (playerEntry == "2" || playerEntry?.Equals("V", StringComparison.OrdinalIgnoreCase) == true)
                     await VisitStarPlanet();
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckInventory();
+                    await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckFunctions();
+                    await CheckFunctions();
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
-                    ViewLogbook();
+                    await ViewLogbook();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -167,15 +171,15 @@ namespace SpaceExploration
                 if (playerEntry == "1" || playerEntry?.Equals("R", StringComparison.OrdinalIgnoreCase) == true)
                     await ReturnToStarSystem();
                 else if (playerEntry == "2" || playerEntry?.Equals("E", StringComparison.OrdinalIgnoreCase) == true)
-                    ExtractResources();
+                    await ExtractResources();
                 else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckInventory();
+                    await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("F", StringComparison.OrdinalIgnoreCase) == true)
-                    CheckFunctions();
+                    await CheckFunctions();
                 else if (playerEntry == "5" || playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
-                    ViewLogbook();
+                    await ViewLogbook();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -203,6 +207,7 @@ namespace SpaceExploration
             starSystemTable.AddColumn(new TableColumn("Name").NoWrap());
             starSystemTable.AddColumn(new TableColumn("Fuel Cost").NoWrap());
             starSystemTable.AddColumn(new TableColumn("Direction").NoWrap());
+            starSystemTable.AddColumn(new TableColumn("Visited?").NoWrap());
             starSystemTable.AddColumn(new TableColumn("Comments").NoWrap());
 
             int count = 1;
@@ -210,6 +215,7 @@ namespace SpaceExploration
             string name;
             double fuel;
             string direction;
+            bool visited;
             string? note;
 
             foreach (int systemID in nearbySystems)
@@ -218,10 +224,11 @@ namespace SpaceExploration
                 name = StarSystem.Systems[systemID].Name;
                 fuel = Math.Round(StarSystem.GetDistance(StarSystem.Systems[systemID]), 2);
                 direction = StarSystem.GetDirection(StarSystem.Systems[systemID]);
+                visited = StarSystem.Systems[systemID].Visited;
                 note = StarSystem.Systems[systemID].Note;
                 note ??= "";
 
-                starSystemTable.AddRow(option, name, $"{fuel} units", direction, note);
+                starSystemTable.AddRow(option, name, $"{fuel} units", direction, $"{visited}", note);
             }
             
             string? playerEntry;
@@ -299,7 +306,7 @@ namespace SpaceExploration
             List<Star> stars = StarSystem.Systems[currentSystem].Stars;
             List<Planet> planets = StarSystem.Systems[currentSystem].Planets;
 
-            Table bodiesTable = new Table();
+            Table bodiesTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
             bodiesTable.AddColumn(new TableColumn("Option").NoWrap());
             bodiesTable.AddColumn(new TableColumn("Object").NoWrap());
             bodiesTable.AddColumn(new TableColumn("Name").NoWrap());
@@ -307,6 +314,7 @@ namespace SpaceExploration
             bodiesTable.AddColumn(new TableColumn("Type").NoWrap());
             bodiesTable.AddColumn(new TableColumn("Mass").NoWrap());
             bodiesTable.AddColumn(new TableColumn("Temperature").NoWrap());
+            bodiesTable.AddColumn(new TableColumn("Visited?").NoWrap());
 
             int count = 1;
             string option;
@@ -316,6 +324,7 @@ namespace SpaceExploration
             string? type;
             double mass;
             int temperature;
+            bool visited;
             List<CelObjectGeneric> celObjects = new List<CelObjectGeneric>();
 
             foreach (Star star in stars)
@@ -326,8 +335,9 @@ namespace SpaceExploration
                 type = Star.StarCatalog[star.Type].DisplayName;
                 mass = Math.Round(star.Mass, 2);
                 temperature = star.Temperature;
+                visited = star.Visited;
 
-                bodiesTable.AddRow(option, "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K");
+                bodiesTable.AddRow(option, "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", $"visited");
                 celObjects.Add(star);
             }
 
@@ -340,9 +350,10 @@ namespace SpaceExploration
                 fuel = Planet.PlanetCatalog[planet.Type].FuelCost;
                 type = null;
                 mass = Math.Round(planet.Mass, 2);
+                visited = planet.Visited;
 
                 type = GetPlanetTypeName(planet);
-                bodiesTable.AddRow(option, "Planet", name!, $"{fuel} units", type, $"{mass} PM", string.Empty);
+                bodiesTable.AddRow(option, "Planet", name!, $"{fuel} units", type, $"{mass} PM", string.Empty, $"{visited}");
                 celObjects.Add(planet);
             }
 
@@ -350,7 +361,7 @@ namespace SpaceExploration
             bool invalidResponse;
             CelObjectGeneric destinationBody;
             string? destinationName;
-            string? destinationType = null;
+            string? destinationType;
 
             do
             {
@@ -417,12 +428,53 @@ namespace SpaceExploration
             } while (invalidResponse);
         }
 
-        public static void CheckInventory()
+        public static async Task CheckInventory()
         {
-            
+            Console.WriteLine($"""
+            Now loading all resource amounts...
+            Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.CargoCap.FunctionAttributes[Player.CargoCap.Level]}
+            """);
+            await Task.Delay(2000);
+
+            Table elementsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+            elementsTable.AddColumn(new TableColumn("Resource").NoWrap());
+            elementsTable.AddColumn(new TableColumn("Amount").NoWrap());
+
+            string? element;
+            int amount;
+
+            foreach (KeyValuePair<Element.ElementType, int> elementType in Player.ElementAmounts)
+            {
+                element = Element.ElementCatalog[elementType.Key].DisplayName;
+                amount = elementType.Value;
+                elementsTable.AddRow($"{element}", $"{amount} units");
+            }
+
+            string? playerEntry;
+            bool invalidResponse;
+
+            do
+            {
+                AnsiConsole.Write(elementsTable);
+                Console.WriteLine("Enter X to exit back to the previous menu.");
+                playerEntry = Console.ReadLine();
+
+                if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    Console.WriteLine("Exiting inventory menu...");
+                    await Task.Delay(2000);
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid option. Try again.");
+                    await Task.Delay(2000);
+                    invalidResponse = true;
+                }
+            } while (invalidResponse);
         }
 
-        public static void CheckFunctions()
+        public static async Task CheckFunctions()
         {
             
         }
@@ -443,14 +495,95 @@ namespace SpaceExploration
             return false;
         }
 
-        public static void ViewLogbook()
+        public static async Task ViewLogbook()
         {
             
         }
 
-        public static void ExtractResources()
+        public static async Task ExtractResources()
         {
-            
+            CelObjectGeneric? currentObject = Player.currentObject;
+            (int propertySkip, object? catalogData, Dictionary<int, Element.ElementType>? indexData) = currentObject switch
+            {
+                Star star => (7, (object?)Star.StarCatalog[star.Type], (Dictionary<int, Element.ElementType>?)Star.StarIndex),
+                Planet planet => (6, (object?)Planet.PlanetCatalog[planet.Type], (Dictionary<int, Element.ElementType>?)Planet.PlanetIndex),
+                _ => (0, null, null)
+            };
+
+            if (catalogData is null)
+                return;
+
+            Dictionary<Element.ElementType, int> elements = new Dictionary<Element.ElementType, int>();
+            PropertyInfo[] properties = catalogData.GetType().GetProperties();
+            int hit;
+            int minAmount;
+            int maxAmount;
+            int amount;
+            string action = "";
+
+            for (int i = propertySkip; i < properties.Length; i++)
+            {
+                object? rawChance = properties[i].GetValue(catalogData);
+                object? rawElementType = indexData![i];
+
+                if (rawChance is int chance && rawElementType is Element.ElementType elementType)
+                {
+                    for (int j = 0; j < ExtractAttempts; j++)
+                    {
+                        hit = Program.Rand.Next(1, 101);
+                        if (hit > chance)
+                            continue;
+
+                        if (
+                            elementType is Element.ElementType.Carbon ||
+                            elementType is Element.ElementType.Magnesium ||
+                            elementType is Element.ElementType.Aluminum ||
+                            elementType is Element.ElementType.Silicon ||
+                            elementType is Element.ElementType.Titanium ||
+                            elementType is Element.ElementType.Iron ||
+                            elementType is Element.ElementType.Nickel ||
+                            elementType is Element.ElementType.Copper
+                        )
+                        {
+                            minAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item1;
+                            maxAmount = Player.RockMiner.FunctionAttributes[Player.RockMiner.Level].Item2;
+                            action = "mining";
+                        }
+                        else if (
+                            elementType is Element.ElementType.Hydrogen ||
+                            elementType is Element.ElementType.Helium ||
+                            elementType is Element.ElementType.Nitrogen ||
+                            elementType is Element.ElementType.Oxygen ||
+                            elementType is Element.ElementType.Sulfur ||
+                            elementType is Element.ElementType.Chlorine ||
+                            elementType is Element.ElementType.Methane ||
+                            elementType is Element.ElementType.Ammonia ||
+                            elementType is Element.ElementType.CarbonDioxide
+                        )
+                        {
+                            minAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item1;
+                            maxAmount = Player.GasSiphon.FunctionAttributes[Player.GasSiphon.Level].Item2;
+                            action = "siphoning";
+                        }
+                        else
+                        {
+                            minAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item1;
+                            maxAmount = Player.CollectClaw.FunctionAttributes[Player.CollectClaw.Level].Item2;
+                            action = "collecting";
+                        }
+
+                        amount = Program.Rand.Next(minAmount, maxAmount + 1);
+                        if (elements.ContainsKey(elementType))
+                            elements[elementType] += amount;
+                        else
+                            elements[elementType] = amount;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Now {action} for resources...");
+            await Task.Delay(2000);
+            await Element.TransactElements(elements);
         }
 
         public static async Task ReturnToStarSystem()
@@ -499,100 +632,6 @@ namespace SpaceExploration
             type ??= "???";
 
             return type;
-        }
-
-        private static async Task TransactElements(Dictionary<Element.ElementType, int> elements, bool verbose)
-        {
-            int have;
-            int delta;
-            int cargo = Player.ElementAmounts.Values.Sum();
-            int cap = Player.CargoCap.FunctionAttributes[Player.CargoCap.Level];
-            string? name;
-            bool invalidResponse;
-
-            if (cargo + elements.Values.Sum() > cap)
-            {
-                Console.WriteLine($"You don't have enough cargo capacity for this transaction.");
-                await Task.Delay(2000);
-                return;
-            }
-            
-            foreach (KeyValuePair<Element.ElementType, int> element in elements)
-            {
-                have = Player.ElementAmounts[element.Key];
-                delta = element.Value;
-                name = Element.ElementCatalog[element.Key].DisplayName;
-
-                if (delta < 0)
-                {
-                    if (verbose)
-                            Console.WriteLine($"You have {have} units of {name} and need {delta} units.");
-
-                    if (have < -delta)
-                    {
-                        Console.WriteLine($"You don't have enough {name}.");
-                        await Task.Delay(2000);
-                        return;
-                    }
-                }
-                else
-                {
-                    if (verbose)
-                            Console.WriteLine($"You have {have} units of {name} and will get {delta} units.");
-
-                    if (cargo + delta > cap)
-                    {
-                        do
-                        {
-                            invalidResponse = false;
-
-                            Console.WriteLine($"Your current cargo capacity of {cargo} won't have room for {delta - cap - cargo} units of {name}, the rest will be discarded.");
-                            Console.WriteLine("Proceed anyway? (Y/N)");
-
-                            string? playerEntry = Console.ReadLine();
-
-                            if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
-                            {
-                                if (verbose)
-                                {
-                                    Console.WriteLine("Proceeding with transaction...");
-                                    await Task.Delay(2000);
-                                }
-                            }
-                            else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
-                            {
-                                Console.WriteLine("Canceling transaction...");
-                                await Task.Delay(2000);
-                                return;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Invalid command. Try again.");
-                                await Task.Delay(2000);
-                                invalidResponse = true;
-                            }
-                        } while (invalidResponse);
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<Element.ElementType, int> element in elements)
-            {
-                have = Player.ElementAmounts[element.Key];
-                delta = element.Value;
-                name = Element.ElementCatalog[element.Key].DisplayName;
-
-                if (verbose)
-                {
-                    Console.WriteLine($"Change of {delta} units of {name}...");
-                    await Task.Delay(1000);
-                }
-
-                Player.ElementAmounts[element.Key] += delta;
-            }
-
-            if (verbose)
-                Console.WriteLine("Transaction complete.");
         }
     }
 }
