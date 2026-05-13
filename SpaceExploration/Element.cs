@@ -9,7 +9,7 @@ namespace SpaceExploration
             int have;
             int delta;
             int cargo = Player.ElementAmounts.Values.Sum();
-            int cap = ((CargoCapacity)Player.Functions[FunType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunType.CargoCapacity]).Level];
+            int cap = ((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).Level];
             string? name;
             bool invalidResponse;
             bool response = false;
@@ -140,32 +140,32 @@ namespace SpaceExploration
         (
             string? DisplayName
         );
+    }
 
-        public enum ElementType
-        {
-            // Elements
-            Hydrogen,           // Basic Fuel
-            Helium,             // Basic Fuel
-            Carbon,             // Life
-            Nitrogen,           // Life
-            Oxygen,             // Life
-            Magnesium,          // Basic Construction
-            Aluminum,           // Basic Construction
-            Silicon,            // Basic Construction
-            Sulfur,             // Chemicals
-            Chlorine,           // Chemicals
-            Titanium,           // Advanced Construction
-            Iron,               // Basic Construction
-            Nickel,             // Advanced Construction
-            Copper,             // Advanced Construction
-            Uranium,            // Advanced Fuel
+    public enum ElementType
+    {
+        // Elements
+        Hydrogen,           // Basic Fuel
+        Helium,             // Basic Fuel
+        Carbon,             // Life
+        Nitrogen,           // Life
+        Oxygen,             // Life
+        Magnesium,          // Basic Construction
+        Aluminum,           // Basic Construction
+        Silicon,            // Basic Construction
+        Sulfur,             // Chemicals
+        Chlorine,           // Chemicals
+        Titanium,           // Advanced Construction
+        Iron,               // Basic Construction
+        Nickel,             // Advanced Construction
+        Copper,             // Advanced Construction
+        Uranium,            // Advanced Fuel
 
-            // Compounds
-            Water,              // Life
-            Methane,            // Basic Fuel
-            Ammonia,            // Chemicals
-            CarbonDioxide,      // Life
-            Antimatter          // Advanced Fuel
-        }
+        // Compounds
+        Water,              // Life
+        Methane,            // Basic Fuel
+        Ammonia,            // Chemicals
+        CarbonDioxide,      // Life
+        Antimatter          // Advanced Fuel
     }
 }

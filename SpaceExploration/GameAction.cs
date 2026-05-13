@@ -26,6 +26,8 @@ namespace SpaceExploration
                     await SystemMenu();
                 else if (gameMode == 3)
                     await VisitMenu();
+                else if (gameMode == 4)
+                    await CheckFunctions();
             }
         }
 
@@ -39,7 +41,7 @@ namespace SpaceExploration
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
@@ -102,7 +104,7 @@ namespace SpaceExploration
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
@@ -163,7 +165,7 @@ namespace SpaceExploration
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
                 Current star or planet: {currentObject}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine($"""
                 Choose an action:
@@ -209,7 +211,7 @@ namespace SpaceExploration
             Console.WriteLine($"""
             Loading nearby star systems...
             Current star system: {currentStarSystem}
-            Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
             """);
             await Task.Delay(2000);
             
@@ -224,7 +226,7 @@ namespace SpaceExploration
             starSystemTable.AddColumn(new TableColumn("Comments").NoWrap());
 
             int count = 1;
-            string option;
+            int option;
             string name;
             double fuel;
             string direction;
@@ -233,7 +235,7 @@ namespace SpaceExploration
 
             foreach (int systemID in nearbySystems)
             {
-                option = count++.ToString();
+                option = count++;
                 name = StarSystem.Systems[systemID].Name;
                 fuel = Math.Round(StarSystem.GetDistance(StarSystem.Systems[systemID]), 2);
                 direction = StarSystem.GetDirection(StarSystem.Systems[systemID]);
@@ -241,7 +243,7 @@ namespace SpaceExploration
                 note = StarSystem.Systems[systemID].Note;
                 note ??= "";
 
-                starSystemTable.AddRow(option, name, $"{fuel} units", direction, $"{visited}", note);
+                starSystemTable.AddRow(option.ToString(), name, $"{fuel} units", direction, visited.ToString(), note);
             }
             
             string? playerEntry;
@@ -272,7 +274,7 @@ namespace SpaceExploration
 
                 destinationSystem = StarSystem.Systems[nearbySystems[result - 1]];
 
-                if (StarSystem.GetDistance(destinationSystem) > Player.ResourceAmounts[ResType.Fuel])
+                if (StarSystem.GetDistance(destinationSystem) > Player.ResourceAmounts[ResourceType.Fuel])
                 {
                     Console.WriteLine("Not enough fuel to jump to that star system. Choose another option.");
                     await Task.Delay(2000);
@@ -288,7 +290,7 @@ namespace SpaceExploration
             if (destinationSystem is null)
                 return;
 
-            Player.ResourceAmounts[ResType.Fuel] -= StarSystem.GetDistance(StarSystem.Systems[destinationSystem.ID]);
+            Player.ResourceAmounts[ResourceType.Fuel] -= StarSystem.GetDistance(StarSystem.Systems[destinationSystem.ID]);
             Player.CurrentSystem = destinationSystem.ID;
             Player.X = destinationSystem.X;
             Player.Y = destinationSystem.Y;
@@ -308,7 +310,7 @@ namespace SpaceExploration
 
             Console.WriteLine($"""
             Loading stars and planets within {StarSystem.Systems[Player.CurrentSystem ?? 0].Name}...
-            Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
             """);
             await Task.Delay(2000);
 
@@ -329,7 +331,7 @@ namespace SpaceExploration
             bodiesTable.AddColumn(new TableColumn("Visited?").NoWrap());
 
             int count = 1;
-            string option;
+            int option;
             int starBorder;
             string? name;
             int fuel;
@@ -341,7 +343,7 @@ namespace SpaceExploration
 
             foreach (Star star in stars)
             {
-                option = count++.ToString();
+                option = count++;
                 name = star.Name;
                 fuel = Star.StarCatalog[star.Type].FuelCost;
                 type = Star.StarCatalog[star.Type].DisplayName;
@@ -349,7 +351,7 @@ namespace SpaceExploration
                 temperature = star.Temperature;
                 visited = star.Visited;
 
-                bodiesTable.AddRow(option, "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", $"{visited}");
+                bodiesTable.AddRow(option.ToString(), "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", visited.ToString());
                 celObjects.Add(star);
             }
 
@@ -357,7 +359,7 @@ namespace SpaceExploration
 
             foreach (Planet planet in planets)
             {
-                option = count++.ToString();
+                option = count++;
                 name = planet.Name;
                 fuel = Planet.PlanetCatalog[planet.Type].FuelCost;
                 type = null;
@@ -365,7 +367,7 @@ namespace SpaceExploration
                 visited = planet.Visited;
 
                 type = GetPlanetTypeName(planet);
-                bodiesTable.AddRow(option, "Planet", name!, $"{fuel} units", type, $"{mass} PM", string.Empty, $"{visited}");
+                bodiesTable.AddRow(option.ToString(), "Planet", name!, $"{fuel} units", type, $"{mass} PM", string.Empty, visited.ToString());
                 celObjects.Add(planet);
             }
 
@@ -400,8 +402,8 @@ namespace SpaceExploration
                 destinationBody = celObjects[result - 1];
 
                 if (
-                    result <= starBorder && Star.StarCatalog[((Star)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResType.Fuel] ||
-                    result > starBorder && Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResType.Fuel]
+                    result <= starBorder && Star.StarCatalog[((Star)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResourceType.Fuel] ||
+                    result > starBorder && Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost > Player.ResourceAmounts[ResourceType.Fuel]
                 )
                 {
                     Console.WriteLine("Not enough fuel to visit that star or planet. Choose another option.");
@@ -429,9 +431,9 @@ namespace SpaceExploration
                 await Task.Delay(2000);
 
                 if (result <= starBorder)
-                    Player.ResourceAmounts[ResType.Fuel] -= Star.StarCatalog[((Star)destinationBody).Type].FuelCost;
+                    Player.ResourceAmounts[ResourceType.Fuel] -= Star.StarCatalog[((Star)destinationBody).Type].FuelCost;
                 else
-                    Player.ResourceAmounts[ResType.Fuel] -= Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost;
+                    Player.ResourceAmounts[ResourceType.Fuel] -= Planet.PlanetCatalog[((Planet)destinationBody).Type].FuelCost;
 
                 Player.CurrentObject = destinationBody;
                 destinationBody.Visited = true;
@@ -447,7 +449,7 @@ namespace SpaceExploration
             {
                 Console.WriteLine($"""
                 Now loading inventory...
-                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunType.CargoCapacity)}
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunctionType.CargoCapacity)}
                 """);
                 await Task.Delay(2000);
 
@@ -457,21 +459,22 @@ namespace SpaceExploration
                 elementsTable.AddColumn(new TableColumn("Amount").NoWrap());
 
                 int count = 1;
-                string option;
+                int option;
                 string? element;
                 int amount;
 
-                foreach (KeyValuePair<Element.ElementType, int> elementType in Player.ElementAmounts)
+                foreach (KeyValuePair<ElementType, int> elementType in Player.ElementAmounts)
                 {
-                    option = count++.ToString();
+                    option = count++;
                     element = Element.ElementCatalog[elementType.Key].DisplayName;
                     amount = elementType.Value;
-                    elementsTable.AddRow(option, element!, $"{amount} units");
+                    
+                    elementsTable.AddRow(option.ToString(), element!, $"{amount} units");
                 }
 
                 string? playerEntry;
                 bool invalidResponse;
-                Element.ElementType? rawOption = null;
+                ElementType? rawOption = null;
 
                 do
                 {
@@ -498,10 +501,10 @@ namespace SpaceExploration
                     rawOption = Player.ElementAmounts.ElementAt(result - 1).Key;
                 } while (invalidResponse);
 
-                if (rawOption is not Element.ElementType discardOption)
+                if (rawOption is not ElementType discardOption)
                     return;
 
-                Dictionary<Element.ElementType, int> discardElement = new Dictionary<Element.ElementType, int>();
+                Dictionary<ElementType, int> discardElement = new Dictionary<ElementType, int>();
                 int discardAmount;
 
                 do
@@ -562,11 +565,11 @@ namespace SpaceExploration
 
                 Console.WriteLine($"""
                 Loading player and ship information...
-                Current money: {Player.ResourceAmounts[ResType.Money]} chromids
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResType.Fuel], 2)} / {Player.GetFunction<double>(FunType.FuelCapacity)}
-                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunType.CargoCapacity)}
-                Current hull integrity: {Math.Round(Player.ResourceAmounts[ResType.Hull], 2)} / {Player.GetFunction<double>(FunType.HullIntegrity)}
-                Current air level: {Player.ResourceAmounts[ResType.Air]} / {Player.GetFunction<int>(FunType.AirCapacity)}
+                Current money: {Player.Money} chromids
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunctionType.CargoCapacity)}
+                Current hull integrity: {Math.Round(Player.ResourceAmounts[ResourceType.Hull], 2)} / {Player.GetFunction<double>(FunctionType.HullIntegrity)}
+                Current air level: {Player.ResourceAmounts[ResourceType.Air]} / {Player.GetFunction<int>(FunctionType.AirCapacity)}
                 """);
                 await Task.Delay(2000);
                 Console.WriteLine($"""
@@ -625,17 +628,17 @@ namespace SpaceExploration
         public static async Task ExtractResources()
         {
             CelObjectGeneric? currentObject = Player.CurrentObject;
-            (int propertySkip, object? catalogData, Dictionary<int, Element.ElementType>? indexData) = currentObject switch
+            (int propertySkip, object? catalogData, Dictionary<int, ElementType>? indexData) = currentObject switch
             {
-                Star star => (7, (object?)Star.StarCatalog[star.Type], (Dictionary<int, Element.ElementType>?)Star.StarIndex),
-                Planet planet => (6, (object?)Planet.PlanetCatalog[planet.Type], (Dictionary<int, Element.ElementType>?)Planet.PlanetIndex),
+                Star star => (7, (object?)Star.StarCatalog[star.Type], (Dictionary<int, ElementType>?)Star.StarIndex),
+                Planet planet => (6, (object?)Planet.PlanetCatalog[planet.Type], (Dictionary<int, ElementType>?)Planet.PlanetIndex),
                 _ => (0, null, null)
             };
 
             if (catalogData is null)
                 return;
 
-            Dictionary<Element.ElementType, int> elements = new Dictionary<Element.ElementType, int>();
+            Dictionary<ElementType, int> elements = new Dictionary<ElementType, int>();
             PropertyInfo[] properties = catalogData.GetType().GetProperties();
             int hit;
             int minAmount;
@@ -647,7 +650,7 @@ namespace SpaceExploration
                 object? rawChance = properties[i].GetValue(catalogData);
                 object? rawElementType = indexData![i];
 
-                if (rawChance is int chance && rawElementType is Element.ElementType elementType)
+                if (rawChance is int chance && rawElementType is ElementType elementType)
                 {
                     for (int j = 0; j < ExtractAttempts; j++)
                     {
@@ -656,38 +659,38 @@ namespace SpaceExploration
                             continue;
 
                         if (
-                            elementType is Element.ElementType.Carbon ||
-                            elementType is Element.ElementType.Magnesium ||
-                            elementType is Element.ElementType.Aluminum ||
-                            elementType is Element.ElementType.Silicon ||
-                            elementType is Element.ElementType.Titanium ||
-                            elementType is Element.ElementType.Iron ||
-                            elementType is Element.ElementType.Nickel ||
-                            elementType is Element.ElementType.Copper
+                            elementType is ElementType.Carbon ||
+                            elementType is ElementType.Magnesium ||
+                            elementType is ElementType.Aluminum ||
+                            elementType is ElementType.Silicon ||
+                            elementType is ElementType.Titanium ||
+                            elementType is ElementType.Iron ||
+                            elementType is ElementType.Nickel ||
+                            elementType is ElementType.Copper
                         )
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.RockMiner).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.RockMiner).Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.RockMiner).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.RockMiner).Item2;
                         }
                         else if (
-                            elementType is Element.ElementType.Hydrogen ||
-                            elementType is Element.ElementType.Helium ||
-                            elementType is Element.ElementType.Nitrogen ||
-                            elementType is Element.ElementType.Oxygen ||
-                            elementType is Element.ElementType.Sulfur ||
-                            elementType is Element.ElementType.Chlorine ||
-                            elementType is Element.ElementType.Methane ||
-                            elementType is Element.ElementType.Ammonia ||
-                            elementType is Element.ElementType.CarbonDioxide
+                            elementType is ElementType.Hydrogen ||
+                            elementType is ElementType.Helium ||
+                            elementType is ElementType.Nitrogen ||
+                            elementType is ElementType.Oxygen ||
+                            elementType is ElementType.Sulfur ||
+                            elementType is ElementType.Chlorine ||
+                            elementType is ElementType.Methane ||
+                            elementType is ElementType.Ammonia ||
+                            elementType is ElementType.CarbonDioxide
                         )
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.GasSiphon).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.GasSiphon).Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.GasSiphon).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.GasSiphon).Item2;
                         }
                         else
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunType.CollectClaw).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunType.CollectClaw).Item2;
+                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.CollectClaw).Item1;
+                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.CollectClaw).Item2;
                         }
 
                         amount = Program.Rand.Next(minAmount, maxAmount + 1);
@@ -715,7 +718,7 @@ namespace SpaceExploration
                 _ => 0
             } * 2;
 
-            if (fuel > Player.ResourceAmounts[ResType.Fuel])
+            if (fuel > Player.ResourceAmounts[ResourceType.Fuel])
             {
                 Console.WriteLine("You don't have enough fuel to leave the planet or star.");
                 await Task.Delay(2000);
@@ -730,7 +733,7 @@ namespace SpaceExploration
                 return;
             }
 
-            Player.ResourceAmounts[ResType.Fuel] -= fuel;
+            Player.ResourceAmounts[ResourceType.Fuel] -= fuel;
             Player.CurrentObject = null;
             Console.WriteLine($"Now leaving {current.Name}...");
             await Task.Delay(2000);
@@ -741,9 +744,9 @@ namespace SpaceExploration
         {
             string? type = null;
 
-            for (int i = 0; i < ((CelestialScanner)Player.Functions[FunType.CelestialScanner]).Level; i++)
+            for (int i = 0; i < ((CelestialScanner)Player.Functions[FunctionType.CelestialScanner]).Level; i++)
             {
-                type = ((CelestialScanner)Player.Functions[FunType.CelestialScanner]).FunctionAttributes[i + 1].Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
+                type = ((CelestialScanner)Player.Functions[FunctionType.CelestialScanner]).FunctionAttributes[i + 1].Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
 
                 if (type is not null)
                     break;

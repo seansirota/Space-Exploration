@@ -81,14 +81,14 @@ namespace SpaceExploration
             }
         }
 
-        public static readonly Dictionary<int, Element.ElementType> StarIndex = new Dictionary<int, Element.ElementType>()
+        public static readonly Dictionary<int, ElementType> StarIndex = new Dictionary<int, ElementType>()
         {
-            [7] = Element.ElementType.Hydrogen,
-            [8] = Element.ElementType.Helium,
-            [9] = Element.ElementType.Carbon,
-            [10] = Element.ElementType.Nitrogen,
-            [11] = Element.ElementType.Oxygen,
-            [12] = Element.ElementType.Antimatter
+            [7] = ElementType.Hydrogen,
+            [8] = ElementType.Helium,
+            [9] = ElementType.Carbon,
+            [10] = ElementType.Nitrogen,
+            [11] = ElementType.Oxygen,
+            [12] = ElementType.Antimatter
         };
 
         public static readonly Dictionary<StarType, StarTypeData> StarCatalog = new Dictionary<StarType, StarTypeData>()

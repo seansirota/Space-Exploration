@@ -8,57 +8,94 @@ namespace SpaceExploration
         public static int X { get; set; } = 0;
         public static int Y { get; set; } = 0;
         public static int? CurrentSystem { get; set; } = null;
+        public static int Money = 0;
         public static CelObjectGeneric? CurrentObject = null;
-        public static Dictionary<FunType, IFunction> Functions = new Dictionary<FunType, IFunction>()
+        public static Dictionary<FunctionType, IFunction> Functions = new Dictionary<FunctionType, IFunction>()
         {
-            [FunType.SystemScanner] = new SystemScanner(),
-            [FunType.CelestialScanner] = new CelestialScanner(),
-            [FunType.RockMiner] = new RockMiner(),
-            [FunType.GasSiphon] = new GasSiphon(),
-            [FunType.CollectClaw] = new CollectClaw(),
-            [FunType.CargoCapacity] = new CargoCapacity(),
-            [FunType.FuelCapacity] = new FuelCapacity(),
-            [FunType.HullIntegrity] = new HullIntegrity(),
-            [FunType.AirCapacity] = new AirCapacity()
+            [FunctionType.SystemScanner] = new SystemScanner(),
+            [FunctionType.CelestialScanner] = new CelestialScanner(),
+            [FunctionType.RockMiner] = new RockMiner(),
+            [FunctionType.GasSiphon] = new GasSiphon(),
+            [FunctionType.CollectClaw] = new CollectClaw(),
+            [FunctionType.CargoCapacity] = new CargoCapacity(),
+            [FunctionType.FuelCapacity] = new FuelCapacity(),
+            [FunctionType.HullIntegrity] = new HullIntegrity(),
+            [FunctionType.AirCapacity] = new AirCapacity()
         };
-        public static Dictionary<ResType, double> ResourceAmounts = new Dictionary<ResType, double>()
+        public static Dictionary<ResourceType, double> ResourceAmounts = new Dictionary<ResourceType, double>()
         {
-            [ResType.Money] = 0,
-            [ResType.Cargo] = GetFunction<int>(FunType.CargoCapacity),
-            [ResType.Fuel] = GetFunction<double>(FunType.FuelCapacity),
-            [ResType.Hull] = GetFunction<double>(FunType.HullIntegrity),
-            [ResType.Air] = GetFunction<int>(FunType.AirCapacity)
+            [ResourceType.Fuel] = GetFunction<double>(FunctionType.FuelCapacity),
+            [ResourceType.Hull] = GetFunction<double>(FunctionType.HullIntegrity),
+            [ResourceType.Air] = GetFunction<int>(FunctionType.AirCapacity)
         };
-        public static Dictionary<Element.ElementType, int> ElementAmounts = new Dictionary<Element.ElementType, int>()
+        public static Dictionary<ElementType, int> ElementAmounts = new Dictionary<ElementType, int>()
         {
-            [Element.ElementType.Hydrogen] = 0,
-            [Element.ElementType.Helium] = 0,
-            [Element.ElementType.Carbon] = 0,
-            [Element.ElementType.Nitrogen] = 0,
-            [Element.ElementType.Oxygen] = 0,
-            [Element.ElementType.Magnesium] = 0,
-            [Element.ElementType.Aluminum] = 0,
-            [Element.ElementType.Silicon] = 0,
-            [Element.ElementType.Sulfur] = 0,
-            [Element.ElementType.Chlorine] = 0,
-            [Element.ElementType.Titanium] = 0,
-            [Element.ElementType.Iron] = 0,
-            [Element.ElementType.Nickel] = 0,
-            [Element.ElementType.Copper] = 0,
-            [Element.ElementType.Uranium] = 0,
-            [Element.ElementType.Water] = 0,
-            [Element.ElementType.Methane] = 0,
-            [Element.ElementType.Ammonia] = 0,
-            [Element.ElementType.CarbonDioxide] = 0,
-            [Element.ElementType.Antimatter] = 0,
+            [ElementType.Hydrogen] = 0,
+            [ElementType.Helium] = 0,
+            [ElementType.Carbon] = 0,
+            [ElementType.Nitrogen] = 0,
+            [ElementType.Oxygen] = 0,
+            [ElementType.Magnesium] = 0,
+            [ElementType.Aluminum] = 0,
+            [ElementType.Silicon] = 0,
+            [ElementType.Sulfur] = 0,
+            [ElementType.Chlorine] = 0,
+            [ElementType.Titanium] = 0,
+            [ElementType.Iron] = 0,
+            [ElementType.Nickel] = 0,
+            [ElementType.Copper] = 0,
+            [ElementType.Uranium] = 0,
+            [ElementType.Water] = 0,
+            [ElementType.Methane] = 0,
+            [ElementType.Ammonia] = 0,
+            [ElementType.CarbonDioxide] = 0,
+            [ElementType.Antimatter] = 0,
         };
 
-        public static T GetFunction<T>(FunType funType)
+        public static T GetFunction<T>(FunctionType FunctionType)
         {
-            IFunction<T> function = (IFunction<T>)Functions[funType];
+            IFunction<T> function = (IFunction<T>)Functions[FunctionType];
 
             return function.FunctionAttributes[function.Level];
         }
+
+        public static readonly Dictionary<ResourceType, ResourceData> ResourceCatalog = new Dictionary<ResourceType, ResourceData>()
+        {
+            [ResourceType.Fuel] = new("Fuel", 150, FunctionType.FuelCapacity, new List<ResourceExchange> {
+                new(ElementType.Water, 1),
+                new(ElementType.Hydrogen, 3),
+                new(ElementType.Helium, 7),
+                new(ElementType.Antimatter, 30)
+            }),
+            [ResourceType.Hull] = new("Hull", 100, FunctionType.HullIntegrity, new List<ResourceExchange>
+            {
+                new(ElementType.Silicon, 1),
+                new(ElementType.Copper, 1),
+                new(ElementType.Iron,  4),
+                new(ElementType.Aluminum, 10),
+                new(ElementType.Nickel, 11),
+                new(ElementType.Titanium, 25)
+            }),
+            [ResourceType.Air] = new("Air", 75, FunctionType.AirCapacity, new List<ResourceExchange>
+            {
+                new(ElementType.Nitrogen, 1),
+                new(ElementType.CarbonDioxide, 2),
+                new(ElementType.Water, 5),
+                new(ElementType.Oxygen, 10)
+            })
+        };
+
+        public sealed record ResourceData(
+            string? DisplayName,
+            int MoneyAmount,
+            FunctionType Function,
+            List<ResourceExchange> ElementCosts
+        );
+
+        public sealed record ResourceExchange(
+            ElementType ElementType, // Element to input for creating the resource
+            int OutputAmount //Output amount of resource from one input element amount
+        );
     }
     public interface IFunction
     {
@@ -121,23 +158,6 @@ namespace SpaceExploration
                         PlanetType.Dark
                     }
                 }
-            };
-        }
-    }
-
-    public class FuelCapacity : IFunction<double>
-    {
-        public int Level { get; set; }
-        public Dictionary<int, double> FunctionAttributes { get; set; }
-
-        public FuelCapacity()
-        {
-            Level = 1;
-            FunctionAttributes = new Dictionary<int, double>()
-            {
-                {1, 50}, // How much fuel the PLayer's ship can hold
-                {2, 100},
-                {3, 150}
             };
         }
     }
@@ -210,19 +230,19 @@ namespace SpaceExploration
         }
     }
 
-    public class AirCapacity : IFunction<int>
+    public class FuelCapacity : IFunction<double>
     {
         public int Level { get; set; }
-        public Dictionary<int, int> FunctionAttributes { get; set; }
+        public Dictionary<int, double> FunctionAttributes { get; set; }
 
-        public AirCapacity()
+        public FuelCapacity()
         {
             Level = 1;
-            FunctionAttributes = new Dictionary<int, int>()
+            FunctionAttributes = new Dictionary<int, double>()
             {
-                {1, 100}, // How much air the PLayer's ship can hold
-                {2, 200},
-                {3, 300}
+                {1, 50}, // How much fuel the PLayer's ship can hold
+                {2, 125},
+                {3, 250}
             };
         }
     }
@@ -239,21 +259,36 @@ namespace SpaceExploration
             {
                 {1, 75}, // How many hitpoints the ship hull has before failing.
                 {2, 150},
-                {3, 250}
+                {3, 300}
             };
         }
     }
 
-    public enum ResType
+    public class AirCapacity : IFunction<int>
     {
-        Money,
-        Cargo,
+        public int Level { get; set; }
+        public Dictionary<int, int> FunctionAttributes { get; set; }
+
+        public AirCapacity()
+        {
+            Level = 1;
+            FunctionAttributes = new Dictionary<int, int>()
+            {
+                {1, 100}, // How much air the PLayer's ship can hold
+                {2, 250},
+                {3, 400}
+            };
+        }
+    }
+
+    public enum ResourceType
+    {
         Fuel,
         Hull,
         Air
     }
 
-    public enum FunType
+    public enum FunctionType
     {
         SystemScanner,
         CelestialScanner,
