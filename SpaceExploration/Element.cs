@@ -4,7 +4,7 @@ namespace SpaceExploration
 {
     class Element
     {
-        public static async Task<bool> TransactElements(Dictionary<ElementType, int> elements, bool verbose = false)
+        public static async Task<bool> TransactElements(Dictionary<ElementType, int> elements, bool verbose = false, bool validate = false, bool skipValidation = false)
         {
             int have;
             int delta;
@@ -30,6 +30,9 @@ namespace SpaceExploration
             
             foreach (KeyValuePair<ElementType, int> element in elements)
             {
+                if (skipValidation)
+                    break;
+
                 have = Player.ElementAmounts[element.Key];
                 delta = element.Value;
                 name = ElementCatalog[element.Key].DisplayName;
@@ -63,7 +66,7 @@ namespace SpaceExploration
                         {
                             invalidResponse = false;
 
-                            Console.WriteLine($"Your current cargo capacity of {cargo} won't have room for {delta - cap - cargo} units of {name}, the rest will be discarded.");
+                            Console.WriteLine($"Your current cargo capacity of {cargo} won't have room for {delta - (cap - cargo)} units of {name}, the rest will be discarded.");
                             Console.WriteLine("Proceed anyway? (Y/N)");
                             string? playerEntry = Console.ReadLine();
 
@@ -92,11 +95,16 @@ namespace SpaceExploration
                 }
             }
 
+            if (validate)
+                return true;
+
             foreach (KeyValuePair<ElementType, int> element in elements)
             {
                 have = Player.ElementAmounts[element.Key];
                 delta = element.Value;
                 name = ElementCatalog[element.Key].DisplayName;
+                cargo = Player.ElementAmounts.Values.Sum();
+                cap = ((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).Level];
 
                 if (verbose)
                 {
@@ -104,7 +112,10 @@ namespace SpaceExploration
                     await Task.Delay(500);
                 }
 
-                Player.ElementAmounts[element.Key] += delta;
+                if (cargo + delta < cap)
+                    Player.ElementAmounts[element.Key] += delta;
+                else
+                    Player.ElementAmounts[element.Key] = cap - cargo;
             }
 
             await Task.Delay(500);

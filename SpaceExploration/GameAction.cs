@@ -48,7 +48,7 @@ namespace SpaceExploration
                 1/J: Jump to new star system.
                 2/V: Visit current star system.
                 3/I: Check inventory.
-                4/F: Check ship functions.
+                4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -111,7 +111,7 @@ namespace SpaceExploration
                 1/L: Look back out to star systems.
                 2/V: View stars and planets in current star system.
                 3/I: Check inventory.
-                4/F: Check ship functions.
+                4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -172,7 +172,7 @@ namespace SpaceExploration
                 1/R: Return to star system. ({Math.Round(fuel, 2)} fuel units required)
                 2/E: Extract resources.
                 3/I: Check inventory.
-                4/F: Check ship functions.
+                4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
                 """);
@@ -564,7 +564,7 @@ namespace SpaceExploration
                 invalidResponse = false;
 
                 Console.WriteLine($"""
-                Loading player and ship information...
+                Viewing player and ship information...
                 Current money: {Player.Money} chromids
                 Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
                 Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunctionType.CargoCapacity)}
@@ -590,7 +590,7 @@ namespace SpaceExploration
                     await Ship.ConfigureAutomations();
                 else if (playerEntry == "4" || playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    Console.WriteLine("Exiting inventory menu...");
+                    Console.WriteLine("Exiting resources and functions menu...");
                     await Task.Delay(2000);
                     gameMode = prevGameMode;
                     return;
@@ -679,6 +679,7 @@ namespace SpaceExploration
                             elementType is ElementType.Oxygen ||
                             elementType is ElementType.Sulfur ||
                             elementType is ElementType.Chlorine ||
+                            elementType is ElementType.Water ||
                             elementType is ElementType.Methane ||
                             elementType is ElementType.Ammonia ||
                             elementType is ElementType.CarbonDioxide
