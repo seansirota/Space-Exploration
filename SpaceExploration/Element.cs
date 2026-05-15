@@ -9,7 +9,7 @@ namespace SpaceExploration
             int have;
             int delta;
             int cargo = Player.ElementAmounts.Values.Sum();
-            int cap = ((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).Level];
+            int cap = Player.GetFunctionAttribute<int>(FunctionType.CargoCapacity);
             string? name;
             bool invalidResponse;
             bool response = false;
@@ -104,7 +104,7 @@ namespace SpaceExploration
                 delta = element.Value;
                 name = ElementCatalog[element.Key].DisplayName;
                 cargo = Player.ElementAmounts.Values.Sum();
-                cap = ((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).FunctionAttributes[((CargoCapacity)Player.Functions[FunctionType.CargoCapacity]).Level];
+                cap = Player.GetFunctionAttribute<int>(FunctionType.CargoCapacity);
 
                 if (verbose)
                 {

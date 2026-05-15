@@ -41,7 +41,7 @@ namespace SpaceExploration
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
@@ -104,7 +104,7 @@ namespace SpaceExploration
                 invalidResponse = false;
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine("""
                 Choose an action:
@@ -165,7 +165,7 @@ namespace SpaceExploration
                 Console.WriteLine($"""
                 Current star system: {currentStarSystem}
                 Current star or planet: {currentObject}
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
                 """);
                 Console.WriteLine($"""
                 Choose an action:
@@ -211,7 +211,7 @@ namespace SpaceExploration
             Console.WriteLine($"""
             Loading nearby star systems...
             Current star system: {currentStarSystem}
-            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
             """);
             await Task.Delay(2000);
             
@@ -310,7 +310,7 @@ namespace SpaceExploration
 
             Console.WriteLine($"""
             Loading stars and planets within {StarSystem.Systems[Player.CurrentSystem ?? 0].Name}...
-            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
+            Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
             """);
             await Task.Delay(2000);
 
@@ -449,7 +449,7 @@ namespace SpaceExploration
             {
                 Console.WriteLine($"""
                 Now loading inventory...
-                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunctionType.CargoCapacity)}
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunctionAttribute<int>(FunctionType.CargoCapacity)}
                 """);
                 await Task.Delay(2000);
 
@@ -566,10 +566,10 @@ namespace SpaceExploration
                 Console.WriteLine($"""
                 Viewing player and ship information...
                 Current money: {Player.Money} chromids
-                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunction<double>(FunctionType.FuelCapacity)}
-                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunction<int>(FunctionType.CargoCapacity)}
-                Current hull integrity: {Math.Round(Player.ResourceAmounts[ResourceType.Hull], 2)} / {Player.GetFunction<double>(FunctionType.HullIntegrity)}
-                Current air level: {Player.ResourceAmounts[ResourceType.Air]} / {Player.GetFunction<int>(FunctionType.AirCapacity)}
+                Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
+                Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunctionAttribute<int>(FunctionType.CargoCapacity)}
+                Current hull integrity: {Math.Round(Player.ResourceAmounts[ResourceType.Hull], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.HullIntegrity)}
+                Current air level: {Math.Round(Player.ResourceAmounts[ResourceType.Air], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.AirCapacity)}
                 """);
                 await Task.Delay(2000);
                 Console.WriteLine($"""
@@ -669,8 +669,8 @@ namespace SpaceExploration
                             elementType is ElementType.Copper
                         )
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.RockMiner).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.RockMiner).Item2;
+                            minAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.RockMiner).Item1;
+                            maxAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.RockMiner).Item2;
                         }
                         else if (
                             elementType is ElementType.Hydrogen ||
@@ -685,13 +685,13 @@ namespace SpaceExploration
                             elementType is ElementType.CarbonDioxide
                         )
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.GasSiphon).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.GasSiphon).Item2;
+                            minAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.GasSiphon).Item1;
+                            maxAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.GasSiphon).Item2;
                         }
                         else
                         {
-                            minAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.CollectClaw).Item1;
-                            maxAmount = Player.GetFunction<Tuple<int, int>>(FunctionType.CollectClaw).Item2;
+                            minAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.CollectClaw).Item1;
+                            maxAmount = Player.GetFunctionAttribute<Tuple<int, int>>(FunctionType.CollectClaw).Item2;
                         }
 
                         amount = Program.Rand.Next(minAmount, maxAmount + 1);
@@ -744,10 +744,13 @@ namespace SpaceExploration
         private static string GetPlanetTypeName(Planet planet)
         {
             string? type = null;
+            int level = Player.Functions[FunctionType.CelestialScanner].Level;
+            List<PlanetType> planetTypes;
 
-            for (int i = 0; i < ((CelestialScanner)Player.Functions[FunctionType.CelestialScanner]).Level; i++)
+            for (int i = 0; i < level; i++)
             {
-                type = ((CelestialScanner)Player.Functions[FunctionType.CelestialScanner]).FunctionAttributes[i + 1].Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
+                planetTypes = ((FunctionData<List<PlanetType>>)Player.FunctionCatalog[(FunctionType.CelestialScanner, i + 1)]).Attribute;
+                type = planetTypes.Contains(planet.Type) ? Planet.PlanetCatalog[planet.Type].DisplayName : null;
 
                 if (type is not null)
                     break;

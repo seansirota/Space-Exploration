@@ -31,18 +31,9 @@ namespace SpaceExploration
                     option = count++.ToString();
                     resourceName = Player.ResourceCatalog[resource.Key].DisplayName!;
                     ownedResource = resource.Value;
+                    maxResource = Player.GetFunctionAttribute<double>(Player.ResourceCatalog[resource.Key].Function);
 
-                    if (resource.Key == ResourceType.Air)
-                    {
-                        maxResource = Player.GetFunction<int>(Player.ResourceCatalog[resource.Key].Function);
-                        resourceTable.AddRow(option.ToString(), resourceName.ToString(), $"{(int)ownedResource} units", $"{(int)maxResource} units");
-                    }
-                        
-                    else
-                    {
-                        maxResource = Player.GetFunction<double>(Player.ResourceCatalog[resource.Key].Function);
-                        resourceTable.AddRow(option.ToString(), resourceName.ToString(), $"{Math.Round(ownedResource, 2)} units", $"{Math.Round(maxResource, 0)} units");
-                    }
+                    resourceTable.AddRow(option.ToString(), resourceName.ToString(), $"{Math.Round(ownedResource, 2)} units", $"{Math.Round(maxResource, 0)} units");
                 }
 
                 string? playerEntry;
@@ -106,11 +97,11 @@ namespace SpaceExploration
                 do
                 {
                     AnsiConsole.Write(conversionTable);
-                    Console.WriteLine("Enter a number to choose an element to exchange. Enter C to exit back to the previous menu.");
+                    Console.WriteLine("Enter a number to choose an element to exchange. Enter C to cancel resource conversion.");
                     playerEntry = Console.ReadLine();
                     invalidResponse = false;
 
-                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                    if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Cancelling resource conversion...");
                         await Task.Delay(2000);
@@ -195,15 +186,168 @@ namespace SpaceExploration
 
         public static async Task UpgradeFunctions()
         {
-            Console.WriteLine("Showing all ship functions...");
-            await Task.Delay(2000);
+            bool stayInMenu = false;
 
-            Table functionTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
-            functionTable.AddColumn(new TableColumn("Option").NoWrap());
-            functionTable.AddColumn(new TableColumn("Function").NoWrap());
-            functionTable.AddColumn(new TableColumn("Level").NoWrap());
-            functionTable.AddColumn(new TableColumn("Description").NoWrap());
+            do
+            {
+                Console.WriteLine("Showing all ship functions...");
+                await Task.Delay(2000);
 
+                Table functionTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                functionTable.AddColumn(new TableColumn("Option").NoWrap());
+                functionTable.AddColumn(new TableColumn("Function").NoWrap());
+                functionTable.AddColumn(new TableColumn("Name").NoWrap());
+                functionTable.AddColumn(new TableColumn("Level").NoWrap());
+                functionTable.AddColumn(new TableColumn("Description").NoWrap());
+
+                int count = 1;
+                string option;
+                string functionName;
+                string displayName;
+                int level;
+                string description;
+
+                foreach (KeyValuePair<FunctionType, IFunctionInit> functionType in Player.Functions)
+                {
+                    option = count++.ToString();
+                    functionName = functionType.Value.FunctionName;
+                    displayName = functionType.Value.DisplayName;
+                    level = functionType.Value.Level;
+                    description = functionType.Value.Description;
+
+                    functionTable.AddRow(option.ToString(), functionName, displayName, level.ToString(), description);
+                }
+
+                string? playerEntry;
+                bool invalidResponse;
+                FunctionType? rawFunctionOption = null;
+                int functionLevel = 0;
+
+                do
+                {
+                    AnsiConsole.Write(functionTable);
+                    Console.WriteLine("Enter a number to choose a function to build or upgrade. Enter X to exit back to the previous menu.");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting function menu...");
+                        await Task.Delay(2000);
+                        return;
+                    }
+
+                    if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                        continue;
+                    }
+
+                    rawFunctionOption = Player.Functions.ElementAt(result - 1).Key;
+                    functionLevel = Player.Functions.ElementAt(result - 1).Value.Level;
+                } while (invalidResponse);
+
+                if (rawFunctionOption is not FunctionType functionOption)
+                    return;
+                
+                Table functionCostTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                functionCostTable.AddColumn(new TableColumn("Element").NoWrap());
+                functionCostTable.AddColumn(new TableColumn("Amount").NoWrap());
+                functionCostTable.AddColumn(new TableColumn("Owned").NoWrap());
+
+                string elementName;
+                ElementType elementType;
+                int ownedAmount;
+                int requiredAmount;
+                bool upgrade = functionLevel > 0;
+                string upgradeText = upgrade ? "upgrade" : "build";
+                Dictionary<ElementType, int> elementsPayment = new Dictionary<ElementType, int>();
+
+                Console.WriteLine($"Displaying element amounts needed to {upgradeText} function...");
+                await Task.Delay(2000);
+
+                foreach (FunctionExchange functionExchange in Player.FunctionCatalog[(functionOption, functionLevel)].FunctionCosts)
+                {
+                    elementType = functionExchange.ElementType;
+                    elementName = Element.ElementCatalog[elementType].DisplayName!;
+                    ownedAmount = Player.ElementAmounts[elementType];
+                    requiredAmount = functionExchange.InputAmount;
+
+                    functionCostTable.AddRow(elementName, requiredAmount.ToString(), ownedAmount.ToString());
+                    elementsPayment.Add(elementType, -requiredAmount);
+                }
+
+                do
+                {
+                    AnsiConsole.Write(functionCostTable);
+                    Console.WriteLine($"These are the required element amounts to {upgradeText} this function. Do you wish to proceed? (Y/N)");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        if (functionLevel == 3)
+                        {
+                            Console.WriteLine("This function has already reached the maximum level and can't be upgraded further. Exiting function menu...");
+                            await Task.Delay(2000);
+                            return;
+                        }
+                    }
+                    else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting function menu...");
+                        await Task.Delay(2000);
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid command. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                    }
+                } while (invalidResponse);
+
+                Console.WriteLine($"Starting {upgradeText} of function...");
+                await Task.Delay(2000);
+
+                bool validated;
+                bool upgraded = false;
+
+                validated = await Element.TransactElements(elementsPayment, false, true);
+
+                if (validated)
+                {
+                    upgraded = await Element.TransactElements(elementsPayment, true, false, true);
+                    Player.UpdateFunction(functionOption);
+                }
+
+                Console.WriteLine(upgraded ? "Function completed." : "Function canceled.");
+                await Task.Delay(2000);
+
+                do
+                {
+                    Console.WriteLine("Do you wish to continuing viewing functions? (Y/N)");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("Y", StringComparison.OrdinalIgnoreCase) == true)
+                        stayInMenu = true;
+                    else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting function menu...");
+                        await Task.Delay(2000);
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid command. Try again.");
+                        await Task.Delay(2000);
+                        invalidResponse = true;
+                    }
+                } while (invalidResponse);
+            } while (stayInMenu);
         }
 
         public static async Task ConfigureAutomations()
@@ -225,13 +369,9 @@ namespace SpaceExploration
                 if (skipValidation)
                     break;
 
-                if (resource.Key == ResourceType.Air)
-                    cap = Player.GetFunction<int>(Player.ResourceCatalog[resource.Key].Function);
-                else
-                    cap = Player.GetFunction<double>(Player.ResourceCatalog[resource.Key].Function);
-
                 have = Player.ResourceAmounts[resource.Key];
                 delta = resource.Value;
+                cap = Player.GetFunctionAttribute<double>(Player.ResourceCatalog[resource.Key].Function);
                 name = Player.ResourceCatalog[resource.Key].DisplayName;
 
                 if (delta < 0)
@@ -297,13 +437,9 @@ namespace SpaceExploration
 
             foreach (KeyValuePair<ResourceType, int> resource in resources)
             {
-                if (resource.Key == ResourceType.Air)
-                    cap = Player.GetFunction<int>(Player.ResourceCatalog[resource.Key].Function);
-                else
-                    cap = Player.GetFunction<double>(Player.ResourceCatalog[resource.Key].Function);
-                    
                 have = Player.ResourceAmounts[resource.Key];
                 delta = resource.Value;
+                cap = Player.GetFunctionAttribute<double>(Player.ResourceCatalog[resource.Key].Function);
                 name = Player.ResourceCatalog[resource.Key].DisplayName;
 
                 if (verbose)
