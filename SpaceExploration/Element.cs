@@ -17,14 +17,14 @@ namespace SpaceExploration
             if (cargo + elements.Values.Sum() > cap)
             {
                 Console.WriteLine($"You don't have enough cargo capacity for this transaction.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 return response;
             }
 
             if (cargo + elements.Values.Sum() < 0)
             {
                 Console.WriteLine($"You don't have enough resources to complete this transaction.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 return response;
             }
             
@@ -42,13 +42,13 @@ namespace SpaceExploration
                     if (verbose)
                     {
                         Console.WriteLine($"You have {have} units of {name} and will give up {delta} units.");
-                        await Task.Delay(500);
+                        await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                     }
 
                     if (have < -delta)
                     {
                         Console.WriteLine($"You don't have enough {name}.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return response;
                     }
                 }
@@ -57,7 +57,7 @@ namespace SpaceExploration
                     if (verbose)
                     {
                         Console.WriteLine($"You have {have} units of {name} and will get {delta} units.");
-                        await Task.Delay(500);
+                        await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                     }
 
                     if (cargo + delta > cap)
@@ -75,19 +75,19 @@ namespace SpaceExploration
                                 if (verbose)
                                 {
                                     Console.WriteLine("Proceeding with transaction...");
-                                    await Task.Delay(2000);
+                                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 }
                             }
                             else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 Console.WriteLine("Canceling transaction...");
-                                await Task.Delay(2000);
+                                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 return response;
                             }
                             else
                             {
                                 Console.WriteLine("Invalid command. Try again.");
-                                await Task.Delay(2000);
+                                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 invalidResponse = true;
                             }
                         } while (invalidResponse);
@@ -109,7 +109,7 @@ namespace SpaceExploration
                 if (verbose)
                 {
                     Console.WriteLine($"Change of {delta} units of {name}...");
-                    await Task.Delay(500);
+                    await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                 }
 
                 if (cargo + delta < cap)
@@ -118,7 +118,7 @@ namespace SpaceExploration
                     Player.ElementAmounts[element.Key] = cap - cargo;
             }
 
-            await Task.Delay(500);
+            await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
             response = true;
             return response;
         }

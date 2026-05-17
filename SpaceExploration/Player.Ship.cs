@@ -12,7 +12,7 @@ namespace SpaceExploration
             do
             {
                 Console.WriteLine("Showing all ship resources...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 Table resourceTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
                 resourceTable.AddColumn(new TableColumn("Option").NoWrap());
@@ -50,14 +50,14 @@ namespace SpaceExploration
                     if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting resource menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
 
                     if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -82,7 +82,7 @@ namespace SpaceExploration
                 ElementType? rawElementOption = null;
 
                 Console.WriteLine("Displaying available element options for resource conversion...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 foreach (Player.ResourceExchange resourceExchange in Player.ResourceCatalog[resourceOption].ElementCosts)
                 {
@@ -104,14 +104,14 @@ namespace SpaceExploration
                     if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Cancelling resource conversion...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
 
                     if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -133,7 +133,7 @@ namespace SpaceExploration
                     if (!int.TryParse(playerEntry, out int result))
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -142,7 +142,7 @@ namespace SpaceExploration
                 } while (invalidResponse);
 
                 Console.WriteLine("Converting resources...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 bool validated = false;
                 bool converted = false;
@@ -152,12 +152,12 @@ namespace SpaceExploration
                             await TransactResources(new Dictionary<ResourceType, int>() { {resourceOption, outputAmount * resourceMultiplier} }, false, true);
 
                 if (validated)
-                    converted = await Element.TransactElements(new Dictionary<ElementType, int>() { {elementOption, -1 * resourceMultiplier} }, true, false, true) &&
-                                await TransactResources(new Dictionary<ResourceType, int>() { {resourceOption, outputAmount * resourceMultiplier} }, true, false, true);
+                    converted = await Element.TransactElements(new Dictionary<ElementType, int>() { {elementOption, -1 * resourceMultiplier} }, Program.Verbose, false, true) &&
+                                await TransactResources(new Dictionary<ResourceType, int>() { {resourceOption, outputAmount * resourceMultiplier} }, Program.Verbose, false, true);
 
 
                 Console.WriteLine(converted ? "Completed conversion." : "Conversion canceled.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 do
                 {
@@ -170,13 +170,13 @@ namespace SpaceExploration
                     else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting resource menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
                     else
                     {
                         Console.WriteLine("Invalid command. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                     }
                 } while (invalidResponse);
@@ -191,7 +191,7 @@ namespace SpaceExploration
             do
             {
                 Console.WriteLine("Showing all ship functions...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 Table functionTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
                 functionTable.AddColumn(new TableColumn("Option").NoWrap());
@@ -233,14 +233,14 @@ namespace SpaceExploration
                     if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting function menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
 
                     if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -266,7 +266,7 @@ namespace SpaceExploration
                 Dictionary<ElementType, int> elementsPayment = new Dictionary<ElementType, int>();
 
                 Console.WriteLine($"Displaying element amounts needed to {upgradeText} function...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 foreach (FunctionExchange functionExchange in Player.FunctionCatalog[(functionOption, functionLevel)].FunctionCosts)
                 {
@@ -291,26 +291,26 @@ namespace SpaceExploration
                         if (functionLevel == 3)
                         {
                             Console.WriteLine("This function has already reached the maximum level and can't be upgraded further. Exiting function menu...");
-                            await Task.Delay(2000);
+                            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                             return;
                         }
                     }
                     else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting function menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
                     else
                     {
                         Console.WriteLine("Invalid command. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                     }
                 } while (invalidResponse);
 
                 Console.WriteLine($"Starting {upgradeText} of function...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 bool validated;
                 bool upgraded = false;
@@ -319,12 +319,12 @@ namespace SpaceExploration
 
                 if (validated)
                 {
-                    upgraded = await Element.TransactElements(elementsPayment, true, false, true);
+                    upgraded = await Element.TransactElements(elementsPayment, Program.Verbose, false, true);
                     Player.UpdateFunction(functionOption);
                 }
 
                 Console.WriteLine(upgraded ? "Function completed." : "Function canceled.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 do
                 {
@@ -337,13 +337,13 @@ namespace SpaceExploration
                     else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting function menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
                     else
                     {
                         Console.WriteLine("Invalid command. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                     }
                 } while (invalidResponse);
@@ -352,7 +352,63 @@ namespace SpaceExploration
 
         public static async Task ConfigureAutomations()
         {
-            
+            bool stayInMenu = false;
+
+            do
+            {
+                Console.WriteLine("Displaying all ship automations...");
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+
+                Table automationsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                automationsTable.AddColumn(new TableColumn("Option").NoWrap());
+                automationsTable.AddColumn(new TableColumn("Description").NoWrap());
+                automationsTable.AddColumn(new TableColumn("Status").NoWrap());
+
+                int count = 1;
+                string option;
+                string description;
+                string? status;
+
+                foreach (KeyValuePair<int, Tuple<string, object>> automation in Program.Automations)
+                {
+                    option = count++.ToString();
+                    description = automation.Value.Item1;
+                    status = (automation.Key != 3) ? automation.Value.Item2.ToString() : Program.SortMethods[(int)automation.Value.Item2];
+
+                    automationsTable.AddRow(option, description, status!);
+                }
+
+                string? playerEntry;
+                bool invalidResponse;
+
+                do
+                {
+                    AnsiConsole.Write(automationsTable);
+                    Console.WriteLine("Enter a number to choose which automation to toggle. Enter X to exit back to the previous menu.");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting ship automations menu...");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        return;
+                    }
+
+                    if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        invalidResponse = true;
+                        continue;
+                    }
+
+                    UpdateAutomations(result);
+                    Console.WriteLine("Updated automation setting.");
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    stayInMenu = true;
+                } while(invalidResponse);
+            } while (stayInMenu);
         }
 
         public static async Task<bool> TransactResources(Dictionary<ResourceType, int> resources, bool verbose = false, bool validate = false, bool skipValidation = false)
@@ -379,13 +435,13 @@ namespace SpaceExploration
                     if (verbose)
                     {
                         Console.WriteLine($"You have {have} units of {name} and will give up {delta} units.");
-                        await Task.Delay(500);
+                        await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                     }
 
                     if (have < -delta)
                     {
                         Console.WriteLine($"You don't have enough {name}.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return response;
                     }
                 }
@@ -394,7 +450,7 @@ namespace SpaceExploration
                     if (verbose)
                     {
                         Console.WriteLine($"You have {have} units of {name} and will get {delta} units.");
-                        await Task.Delay(500);
+                        await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                     }
 
                     if (have + delta > cap)
@@ -412,19 +468,19 @@ namespace SpaceExploration
                                 if (verbose)
                                 {
                                     Console.WriteLine("Proceeding with transaction...");
-                                    await Task.Delay(2000);
+                                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 }
                             }
                             else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 Console.WriteLine("Canceling transaction...");
-                                await Task.Delay(2000);
+                                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 return response;
                             }
                             else
                             {
                                 Console.WriteLine("Invalid command. Try again.");
-                                await Task.Delay(2000);
+                                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                                 invalidResponse = true;
                             }
                         } while (invalidResponse);
@@ -445,7 +501,7 @@ namespace SpaceExploration
                 if (verbose)
                 {
                     Console.WriteLine($"Change of {delta} units of {name}...");
-                    await Task.Delay(500);
+                    await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
                 }
 
                 if (have + delta < cap)
@@ -454,9 +510,49 @@ namespace SpaceExploration
                     Player.ResourceAmounts[resource.Key] = cap;
             }
 
-            await Task.Delay(500);
+            await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
             response = true;
             return response;
+        }
+
+        private static void UpdateAutomations(int automation)
+        {
+            object newValue;
+
+            switch(automation) {
+                case 1:
+                    Program.Verbose = !Program.Verbose;
+                    newValue = Program.Verbose;
+                    break;
+                case 2:
+                    Program.TextShorten = !Program.TextShorten;
+                    if (!Program.TextShorten)
+                    {
+                        Program.LongTextMultiplier *= 2;
+                        Program.ShortTextMultiplier *= 2;
+                    }
+                    else
+                    {
+                        Program.LongTextMultiplier /= 2;
+                        Program.ShortTextMultiplier /= 2;
+                    }
+                    newValue = Program.TextShorten;
+                    break;
+                case 3:
+                    if (Program.SortPattern < 3)
+                    {
+                        Program.SortPattern++;
+                    }
+                    else
+                        Program.SortPattern = 1;
+                    newValue = Program.SortPattern;
+                    break;
+                default:
+                    newValue = 0;
+                    break;
+            }
+
+            Program.Automations[automation] = new Tuple<string, object>(Program.Automations[automation].Item1, newValue);
         }
     }
 }

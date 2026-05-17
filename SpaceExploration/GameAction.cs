@@ -62,14 +62,14 @@ namespace SpaceExploration
                     if (Player.CurrentSystem is null)
                     {
                         Console.WriteLine("No current star system selected.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                     }
                     else
                     {
                         gameMode = 2;
                         Console.WriteLine("Flying into star system...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         await SystemMenu();
                     }
                 }
@@ -88,7 +88,7 @@ namespace SpaceExploration
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                 }
             } while (invalidResponse);
@@ -122,7 +122,7 @@ namespace SpaceExploration
                 {
                     gameMode = 1;
                     Console.WriteLine("Returning to galaxy view...");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 }
                 else if (playerEntry == "2" || playerEntry?.Equals("V", StringComparison.OrdinalIgnoreCase) == true)
                     await VisitStarPlanet();
@@ -141,7 +141,7 @@ namespace SpaceExploration
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                 }
             } while (invalidResponse);
@@ -198,7 +198,7 @@ namespace SpaceExploration
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                 }
             } while (invalidResponse);
@@ -213,7 +213,7 @@ namespace SpaceExploration
             Current star system: {currentStarSystem}
             Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
             """);
-            await Task.Delay(2000);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
             
             List<int> nearbySystems = StarSystem.GetNearbySystems();
 
@@ -260,14 +260,14 @@ namespace SpaceExploration
                 if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine("Canceling. Returning to main selection menu...");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     return;
                 }
 
                 if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                 {
                     Console.WriteLine("Invalid option. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                     continue;
                 }
@@ -277,13 +277,13 @@ namespace SpaceExploration
                 if (StarSystem.GetDistance(destinationSystem) > Player.ResourceAmounts[ResourceType.Fuel])
                 {
                     Console.WriteLine("Not enough fuel to jump to that star system. Choose another option.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                     continue;
                 }
 
                 Console.WriteLine($"Jumping to the {destinationSystem.Name} star system...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
             } while (invalidResponse);
 
@@ -304,7 +304,7 @@ namespace SpaceExploration
             if (Player.CurrentSystem == null)
             {
                 Console.WriteLine("You're not located within a star system.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 return;
             }
 
@@ -312,7 +312,7 @@ namespace SpaceExploration
             Loading stars and planets within {StarSystem.Systems[Player.CurrentSystem ?? 0].Name}...
             Current fuel level: {Math.Round(Player.ResourceAmounts[ResourceType.Fuel], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.FuelCapacity)}
             """);
-            await Task.Delay(2000);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
             if (Player.CurrentSystem is not int currentSystem)
                 return;
@@ -387,14 +387,14 @@ namespace SpaceExploration
                 if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine("Canceling. Returning to star and planet selection menu...");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     return;
                 }
 
                 if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                 {
                     Console.WriteLine("Invalid option. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                     continue;
                 }
@@ -407,7 +407,7 @@ namespace SpaceExploration
                 )
                 {
                     Console.WriteLine("Not enough fuel to visit that star or planet. Choose another option.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                     continue;
                 }
@@ -419,7 +419,7 @@ namespace SpaceExploration
                     if (destinationType == "???")
                     {
                         Console.WriteLine("Current celestial sensors aren't advanced enough to set reliable course to this planet.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -428,7 +428,7 @@ namespace SpaceExploration
                 destinationName = destinationBody.Name;
 
                 Console.WriteLine($"Flying to {destinationName}...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 if (result <= starBorder)
                     Player.ResourceAmounts[ResourceType.Fuel] -= Star.StarCatalog[((Star)destinationBody).Type].FuelCost;
@@ -451,7 +451,7 @@ namespace SpaceExploration
                 Now loading inventory...
                 Current cargo capacity: {Player.ElementAmounts.Values.Sum()} / {Player.GetFunctionAttribute<int>(FunctionType.CargoCapacity)}
                 """);
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 Table elementsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
                 elementsTable.AddColumn(new TableColumn("Option").NoWrap());
@@ -486,14 +486,14 @@ namespace SpaceExploration
                     if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting inventory menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
 
                     if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -516,7 +516,7 @@ namespace SpaceExploration
                     if (!int.TryParse(playerEntry, out int result) || result < 0 || result > Player.ElementAmounts[discardOption])
                     {
                         Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                         continue;
                     }
@@ -526,10 +526,10 @@ namespace SpaceExploration
                 } while (invalidResponse);
 
                 Console.WriteLine("Discarding elements...");
-                await Task.Delay(2000);
-                bool discarded = await Element.TransactElements(discardElement, true);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                bool discarded = await Element.TransactElements(discardElement, Program.Verbose);
                 Console.WriteLine(discarded ? "Completed disposal." : "Discard canceled.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
 
                 do
                 {
@@ -542,13 +542,13 @@ namespace SpaceExploration
                     else if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Console.WriteLine("Exiting inventory menu...");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         return;
                     }
                     else
                     {
                         Console.WriteLine("Invalid command. Try again.");
-                        await Task.Delay(2000);
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                         invalidResponse = true;
                     }
                 } while (invalidResponse);
@@ -571,7 +571,7 @@ namespace SpaceExploration
                 Current hull integrity: {Math.Round(Player.ResourceAmounts[ResourceType.Hull], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.HullIntegrity)}
                 Current air level: {Math.Round(Player.ResourceAmounts[ResourceType.Air], 2)} / {Player.GetFunctionAttribute<double>(FunctionType.AirCapacity)}
                 """);
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 Console.WriteLine($"""
                 Choose an action:
                 1/N: Convert elements into ship resources.
@@ -591,14 +591,14 @@ namespace SpaceExploration
                 else if (playerEntry == "4" || playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine("Exiting resources and functions menu...");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     gameMode = prevGameMode;
                     return;
                 }
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
-                    await Task.Delay(2000);
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                     invalidResponse = true;
                 }
             } while (invalidResponse);
@@ -609,14 +609,14 @@ namespace SpaceExploration
             if (Player.CurrentSystem is not int currentSystem)
             {
                 Console.WriteLine("Not a valid star system. Returning to main selection menu...");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 return true;
             }
             Console.WriteLine("Enter a note for this star system below.");
 
             StarSystem.Systems[currentSystem].Note = Console.ReadLine();
             Console.WriteLine("Note saved. Returning to main selection menu...");
-            await Task.Delay(2000);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
             return false;
         }
 
@@ -704,10 +704,10 @@ namespace SpaceExploration
             }
 
             Console.WriteLine("Beginning extraction of resources...");
-            await Task.Delay(2000);
-            bool extracted = await Element.TransactElements(elements, true);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+            bool extracted = await Element.TransactElements(elements, Program.Verbose);
             Console.WriteLine(extracted ? "Completed resource extraction." : "Extraction canceled.");
-            await Task.Delay(2000);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
         }
 
         public static async Task ReturnToStarSystem()
@@ -722,7 +722,7 @@ namespace SpaceExploration
             if (fuel > Player.ResourceAmounts[ResourceType.Fuel])
             {
                 Console.WriteLine("You don't have enough fuel to leave the planet or star.");
-                await Task.Delay(2000);
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
                 return;
             }
 
@@ -737,7 +737,7 @@ namespace SpaceExploration
             Player.ResourceAmounts[ResourceType.Fuel] -= fuel;
             Player.CurrentObject = null;
             Console.WriteLine($"Now leaving {current.Name}...");
-            await Task.Delay(2000);
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
             gameMode = 2;
         }
 
