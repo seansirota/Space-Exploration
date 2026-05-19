@@ -350,67 +350,6 @@ namespace SpaceExploration
             } while (stayInMenu);
         }
 
-        public static async Task ConfigureAutomations()
-        {
-            bool stayInMenu = false;
-
-            do
-            {
-                Console.WriteLine("Displaying all ship automations...");
-                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
-
-                Table automationsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
-                automationsTable.AddColumn(new TableColumn("Option").NoWrap());
-                automationsTable.AddColumn(new TableColumn("Description").NoWrap());
-                automationsTable.AddColumn(new TableColumn("Status").NoWrap());
-
-                int count = 1;
-                string option;
-                string description;
-                string? status;
-
-                foreach (KeyValuePair<int, Tuple<string, object>> automation in Program.Automations)
-                {
-                    option = count++.ToString();
-                    description = automation.Value.Item1;
-                    status = (automation.Key != 3) ? automation.Value.Item2.ToString() : Program.SortMethods[(int)automation.Value.Item2];
-
-                    automationsTable.AddRow(option, description, status!);
-                }
-
-                string? playerEntry;
-                bool invalidResponse;
-
-                do
-                {
-                    AnsiConsole.Write(automationsTable);
-                    Console.WriteLine("Enter a number to choose which automation to toggle. Enter X to exit back to the previous menu.");
-                    playerEntry = Console.ReadLine();
-                    invalidResponse = false;
-
-                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        Console.WriteLine("Exiting ship automations menu...");
-                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
-                        return;
-                    }
-
-                    if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
-                    {
-                        Console.WriteLine("Invalid option. Try again.");
-                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
-                        invalidResponse = true;
-                        continue;
-                    }
-
-                    UpdateAutomations(result);
-                    Console.WriteLine("Updated automation setting.");
-                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
-                    stayInMenu = true;
-                } while(invalidResponse);
-            } while (stayInMenu);
-        }
-
         public static async Task<bool> TransactResources(Dictionary<ResourceType, int> resources, bool verbose = false, bool validate = false, bool skipValidation = false)
         {
             double have;
@@ -513,46 +452,6 @@ namespace SpaceExploration
             await Task.Delay(Program.BaseSpeed * Program.ShortTextMultiplier);
             response = true;
             return response;
-        }
-
-        private static void UpdateAutomations(int automation)
-        {
-            object newValue;
-
-            switch(automation) {
-                case 1:
-                    Program.Verbose = !Program.Verbose;
-                    newValue = Program.Verbose;
-                    break;
-                case 2:
-                    Program.TextShorten = !Program.TextShorten;
-                    if (!Program.TextShorten)
-                    {
-                        Program.LongTextMultiplier *= 2;
-                        Program.ShortTextMultiplier *= 2;
-                    }
-                    else
-                    {
-                        Program.LongTextMultiplier /= 2;
-                        Program.ShortTextMultiplier /= 2;
-                    }
-                    newValue = Program.TextShorten;
-                    break;
-                case 3:
-                    if (Program.SortPattern < 3)
-                    {
-                        Program.SortPattern++;
-                    }
-                    else
-                        Program.SortPattern = 1;
-                    newValue = Program.SortPattern;
-                    break;
-                default:
-                    newValue = 0;
-                    break;
-            }
-
-            Program.Automations[automation] = new Tuple<string, object>(Program.Automations[automation].Item1, newValue);
         }
     }
 }

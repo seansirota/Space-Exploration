@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime;
@@ -51,6 +52,7 @@ namespace SpaceExploration
                 4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
+                7/A: Configure settings.
                 """);
 
                 string? playerEntry = Console.ReadLine();
@@ -85,6 +87,8 @@ namespace SpaceExploration
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
                     await ViewLogbook();
+                else if (playerEntry == "7" || playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
+                    await ConfigureAutomations();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -114,6 +118,7 @@ namespace SpaceExploration
                 4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
+                7/A: Configure settings.
                 """);
 
                 string? playerEntry = Console.ReadLine();
@@ -138,6 +143,8 @@ namespace SpaceExploration
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
                     await ViewLogbook();
+                else if (playerEntry == "7" || playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
+                    await ConfigureAutomations();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -175,6 +182,7 @@ namespace SpaceExploration
                 4/F: Check ship resources and functions.
                 5/N: Leave a note on the current star system.
                 6/B: View logbook.
+                7/A: Configure settings.
                 """);
 
                 string? playerEntry = Console.ReadLine();
@@ -195,6 +203,8 @@ namespace SpaceExploration
                     invalidResponse = await AddNote();
                 else if (playerEntry == "6" || playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
                     await ViewLogbook();
+                else if (playerEntry == "7" || playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
+                    await ConfigureAutomations();
                 else
                 {
                     Console.WriteLine("Invalid command. Try again.");
@@ -576,7 +586,7 @@ namespace SpaceExploration
                 Choose an action:
                 1/N: Convert elements into ship resources.
                 2/U: View and upgrade ship functions.
-                3/A: Configure ship automations.
+                3/I: Check inventory.
                 4/X: Exit ship functions menu.
                 """);
 
@@ -586,8 +596,8 @@ namespace SpaceExploration
                     await Ship.ConvertResources();
                 else if (playerEntry == "2" || playerEntry?.Equals("U", StringComparison.OrdinalIgnoreCase) == true)
                     await Ship.UpgradeFunctions();
-                else if (playerEntry == "3" || playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
-                    await Ship.ConfigureAutomations();
+                else if (playerEntry == "3" || playerEntry?.Equals("I", StringComparison.OrdinalIgnoreCase) == true)
+                    await CheckInventory();
                 else if (playerEntry == "4" || playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Console.WriteLine("Exiting resources and functions menu...");
@@ -622,7 +632,306 @@ namespace SpaceExploration
 
         public static async Task ViewLogbook()
         {
-            
+            Console.WriteLine("Displaying discovered star systems...");
+            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+
+            int count = 1;
+            int option;
+            string? name;
+            double fuel;
+            string direction;
+            bool visited;
+            string? note;
+
+            int systemID;
+            int rowNumber = 0;
+            bool stayInStarSystemLoop;
+            int sortPattern = Program.SortPattern;
+            bool reverseSort = false;
+            double distance;
+            Dictionary<int, Tuple<StarSystem, double>> sortSystems = new Dictionary<int, Tuple<StarSystem, double>>();
+
+            string? playerEntry;
+            bool invalidResponse;
+            StarSystem? destinationSystem;
+
+            do
+            {
+                stayInStarSystemLoop = true;
+                destinationSystem = null;
+                sortSystems.Clear();
+
+                foreach (KeyValuePair<int, StarSystem> system in StarSystem.Systems)
+                {
+                    distance = StarSystem.GetDistance(StarSystem.Systems[system.Key]);
+                    sortSystems[system.Key] = new Tuple<StarSystem, double>(system.Value, distance);
+                }
+
+                Table starSystemTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                starSystemTable.AddColumn(new TableColumn("Option").NoWrap());
+                starSystemTable.AddColumn(new TableColumn("Name").NoWrap());
+                starSystemTable.AddColumn(new TableColumn("Fuel Cost").NoWrap());
+                starSystemTable.AddColumn(new TableColumn("Direction").NoWrap());
+                starSystemTable.AddColumn(new TableColumn("Visited?").NoWrap());
+                starSystemTable.AddColumn(new TableColumn("Comments").NoWrap());
+
+                if (sortPattern == 1)
+                    sortSystems = sortSystems.OrderBy(s => s.Key).ToDictionary();
+                else if (sortPattern == 2)
+                    sortSystems = sortSystems.OrderBy(s => s.Value.Item1.Name).ToDictionary();
+                else if (sortPattern == 3)
+                    sortSystems = sortSystems.OrderBy(s => s.Value.Item2).ToDictionary();
+                else
+                    sortSystems = sortSystems.OrderBy(s => s.Key).ToDictionary();
+
+                
+                if (reverseSort)
+                    sortSystems = sortSystems.Reverse().ToDictionary();
+
+                count = rowNumber + 1;
+
+                for (int i = rowNumber; i < rowNumber + Program.PageRowLimit && i < sortSystems.Count; i++)
+                {
+                    systemID = sortSystems.ElementAt(i).Key;
+                    option = count++;
+                    name = sortSystems[systemID].Item1.Name;
+                    fuel = Math.Round(StarSystem.GetDistance(sortSystems[systemID].Item1), 2);
+                    direction = StarSystem.GetDirection(sortSystems[systemID].Item1);
+                    visited = sortSystems[systemID].Item1.Visited;
+                    note = sortSystems[systemID].Item1.Note;
+                    note ??= "";
+
+                    starSystemTable.AddRow(option.ToString(), name, $"{fuel} units", direction, visited.ToString(), note);
+                }
+
+                do
+                {
+                    AnsiConsole.Write(starSystemTable);
+                    Console.WriteLine("""
+                    Enter a number to choose a star system to view.
+                    Enter N to view the next set of star systems.
+                    Enter B to view the previous set of star systems.
+                    Enter H to sort by historical discovery order.
+                    Enter A to sort by alphabetical order.
+                    Enter D to sort by distance from ship.
+                    Enter R to reverse the sort order.
+                    Enter C to cancel.
+                    """);
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("N", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        if (rowNumber + Program.PageRowLimit < sortSystems.Count)
+                        {
+                            Console.WriteLine("Displaying the next set of star systems...");
+                            rowNumber += Program.PageRowLimit;
+                        }
+                        else
+                            Console.WriteLine("No more star systems to display.");
+
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("B", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        if (rowNumber + Program.PageRowLimit > Program.PageRowLimit)
+                        {
+                            Console.WriteLine("Displaying the previous set of star systems...");
+                            rowNumber -= Program.PageRowLimit;
+                        }
+                        else
+                            Console.WriteLine("No more star systems to display.");
+
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("H", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Resorting star system list in historical discovery order...");
+                        sortPattern = 1;
+                        rowNumber = 0;
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("A", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Resorting star system list in alphabetical order...");
+                        sortPattern = 2;
+                        rowNumber = 0;
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("D", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Resorting star system list in distance from ship order...");
+                        sortPattern = 3;
+                        rowNumber = 0;
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("R", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Resorting star system list in reverse order...");
+                        reverseSort = !reverseSort;
+                        rowNumber = 0;
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    }
+                    else if (playerEntry?.Equals("C", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Canceling. Returning to main selection menu...");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        return;
+                    }
+                    else if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        invalidResponse = true;
+                    }
+                    else if (!sortSystems.ElementAt(result - 1).Value.Item1.Visited)
+                    {
+                        Console.WriteLine("You haven't visited this star system yet. Try again.");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        invalidResponse = true;
+                    }
+                    else
+                        destinationSystem = sortSystems.ElementAt(result + rowNumber - 1).Value.Item1;
+                } while (invalidResponse);
+
+                if (destinationSystem is not null)
+                {
+                    Console.WriteLine($"Loading stars and planets within {destinationSystem.Name}...");
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+
+                    List<Star> stars = destinationSystem.Stars;
+                    List<Planet> planets = destinationSystem.Planets;
+
+                    Table bodiesTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                    bodiesTable.AddColumn(new TableColumn("Option").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Object").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Name").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Fuel Cost").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Type").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Mass").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Temperature").NoWrap());
+                    bodiesTable.AddColumn(new TableColumn("Visited?").NoWrap());
+
+                    count = 1;
+                    int starBorder;
+                    string? type;
+                    double mass;
+                    int temperature;
+                    List<CelObjectGeneric> celObjects = new List<CelObjectGeneric>();
+
+                    foreach (Star star in stars)
+                    {
+                        option = count++;
+                        name = star.Name;
+                        fuel = Star.StarCatalog[star.Type].FuelCost;
+                        type = Star.StarCatalog[star.Type].DisplayName;
+                        mass = Math.Round(star.Mass, 2);
+                        temperature = star.Temperature;
+                        visited = star.Visited;
+
+                        bodiesTable.AddRow(option.ToString(), "Star", name!, $"{fuel} units", type!, $"{mass} SM", $"{temperature} K", visited.ToString());
+                        celObjects.Add(star);
+                    }
+
+                    starBorder = count - 1;
+
+                    foreach (Planet planet in planets)
+                    {
+                        option = count++;
+                        name = planet.Name;
+                        fuel = Planet.PlanetCatalog[planet.Type].FuelCost;
+                        type = null;
+                        mass = Math.Round(planet.Mass, 2);
+                        visited = planet.Visited;
+
+                        type = GetPlanetTypeName(planet);
+                        bodiesTable.AddRow(option.ToString(), "Planet", name!, $"{fuel} units", type, $"{mass} PM", string.Empty, visited.ToString());
+                        celObjects.Add(planet);
+                    }
+
+                    do
+                    {
+                        AnsiConsole.Write(bodiesTable);
+                        Console.WriteLine("Enter X to exit back to the star system menu.");
+                        playerEntry = Console.ReadLine();
+                        invalidResponse = false;
+
+                        if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            Console.WriteLine("Exiting back to star system menu...");
+                            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid option. Try again.");
+                            await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                            invalidResponse = true;
+                            continue;
+                        }
+                    } while (invalidResponse);
+                }
+            } while(stayInStarSystemLoop);
+        }
+
+        public static async Task ConfigureAutomations()
+        {
+            bool stayInMenu = false;
+
+            do
+            {
+                Console.WriteLine("Displaying settings to configure...");
+                await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+
+                Table automationsTable = new Table().Border(TableBorder.Rounded).ShowHeaders();
+                automationsTable.AddColumn(new TableColumn("Option").NoWrap());
+                automationsTable.AddColumn(new TableColumn("Description").NoWrap());
+                automationsTable.AddColumn(new TableColumn("Status").NoWrap());
+
+                int count = 1;
+                string option;
+                string description;
+                string? status;
+
+                foreach (KeyValuePair<int, Tuple<string, object>> automation in Program.Automations)
+                {
+                    option = count++.ToString();
+                    description = automation.Value.Item1;
+                    status = (automation.Key != 3) ? automation.Value.Item2.ToString() : Program.SortMethods[(int)automation.Value.Item2];
+
+                    automationsTable.AddRow(option, description, status!);
+                }
+
+                string? playerEntry;
+                bool invalidResponse;
+
+                do
+                {
+                    AnsiConsole.Write(automationsTable);
+                    Console.WriteLine("Enter a number to choose which setting to toggle. Enter X to exit back to the previous menu.");
+                    playerEntry = Console.ReadLine();
+                    invalidResponse = false;
+
+                    if (playerEntry?.Equals("X", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Console.WriteLine("Exiting settings menu...");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        return;
+                    }
+
+                    if (!int.TryParse(playerEntry, out int result) || result < 1 || result >= count)
+                    {
+                        Console.WriteLine("Invalid option. Try again.");
+                        await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                        invalidResponse = true;
+                        continue;
+                    }
+
+                    UpdateAutomations(result);
+                    Console.WriteLine("Updated setting.");
+                    await Task.Delay(Program.BaseSpeed * Program.LongTextMultiplier);
+                    stayInMenu = true;
+                } while(invalidResponse);
+            } while (stayInMenu);
         }
 
         public static async Task ExtractResources()
@@ -759,6 +1068,52 @@ namespace SpaceExploration
             type ??= "???";
 
             return type;
+        }
+
+        private static void UpdateAutomations(int automation)
+        {
+            object newValue;
+
+            switch(automation) {
+                case 1:
+                    Program.Verbose = !Program.Verbose;
+                    newValue = Program.Verbose;
+                    break;
+                case 2:
+                    Program.TextShorten = !Program.TextShorten;
+                    if (!Program.TextShorten)
+                    {
+                        Program.LongTextMultiplier *= 2;
+                        Program.ShortTextMultiplier *= 2;
+                    }
+                    else
+                    {
+                        Program.LongTextMultiplier /= 2;
+                        Program.ShortTextMultiplier /= 2;
+                    }
+                    newValue = Program.TextShorten;
+                    break;
+                case 3:
+                    if (Program.SortPattern < 3)
+                        Program.SortPattern++;
+                    else
+                        Program.SortPattern = 1;
+                    newValue = Program.SortPattern;
+                    break;
+                case 4:
+                    Program.IncreasedRowLimit = !Program.IncreasedRowLimit;
+                    if (!Program.IncreasedRowLimit)
+                        Program.PageRowLimit /= 2;
+                    else
+                        Program.PageRowLimit *= 2;
+                    newValue = Program.IncreasedRowLimit;
+                    break;
+                default:
+                    newValue = 0;
+                    break;
+            }
+
+            Program.Automations[automation] = new Tuple<string, object>(Program.Automations[automation].Item1, newValue);
         }
     }
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SpaceExploration")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+51b9aaaaf6324ba13310942c95459c9c919941a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a2fa99569f6d69a0bdcc51182c8d942ed8f00f1a")]
 [assembly: System.Reflection.AssemblyProductAttribute("SpaceExploration")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SpaceExploration")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

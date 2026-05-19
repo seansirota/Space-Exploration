@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "GamZ8ybVo+c=",
+  "dgSpecHash": "u4k+pWWgS+M=",
   "success": true,
-  "projectFilePath": "/home/sean/Documents/Space Exploration/Space-Exploration/SpaceExploration/SpaceExploration.csproj",
+  "projectFilePath": "C:\\Users\\SSirota\\Documents\\Space Exploration\\Space-Exploration\\SpaceExploration\\SpaceExploration.csproj",
   "expectedPackageFiles": [
-    "/home/sean/.nuget/packages/spectre.console/0.55.2/spectre.console.0.55.2.nupkg.sha512",
-    "/home/sean/.nuget/packages/spectre.console.ansi/0.55.2/spectre.console.ansi.0.55.2.nupkg.sha512"
+    "C:\\Users\\SSirota\\.nuget\\packages\\spectre.console\\0.55.2\\spectre.console.0.55.2.nupkg.sha512",
+    "C:\\Users\\SSirota\\.nuget\\packages\\spectre.console.ansi\\0.55.2\\spectre.console.ansi.0.55.2.nupkg.sha512"
   ],
   "logs": []
 }
